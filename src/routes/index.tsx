@@ -63,7 +63,7 @@ function Index() {
     </header>
     <main className="flex-1">
       <section className="relative overflow-hidden bg-primary text-primary-foreground" aria-labelledby="event-title">
-        <Emblem className="absolute cursor-pointer select-none overflow-visible right-5 top-9 h-[118px] w-auto sm:bottom-0 sm:right-[7%] sm:top-auto sm:h-[86%]" />
+        <Emblem className="absolute z-10 cursor-pointer select-none overflow-visible right-5 top-9 h-[118px] w-auto sm:bottom-0 sm:right-[7%] sm:top-auto sm:h-[86%]" />
         <div className="relative mx-auto max-w-[720px] px-5 pb-12 pt-10 sm:px-8 sm:pb-16 sm:pt-14">
           <h1 id="event-title" className="font-display font-extrabold leading-[0.88]">
             <span className="block text-[92px] sm:text-[140px]">VANSA</span>
