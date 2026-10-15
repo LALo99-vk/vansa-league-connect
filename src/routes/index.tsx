@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, MapPin } from "lucide-react";
 import { RegistrationForm } from "@/components/registration-form";
-import pitch from "@/assets/vansa-pitch.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -25,19 +23,14 @@ function Index() {
       </div>
     </header>
     <main>
-      <section className="event-hero relative isolate overflow-hidden">
-        <img src={pitch} alt="A sunlit football pitch with a white goal and tree-lined school grounds" width={1920} height={1024} fetchPriority="high" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
-        <div className="absolute inset-0 -z-10 bg-hero-overlay" />
-        <div className="mx-auto max-w-6xl px-6 py-7 sm:py-10 md:px-10 md:py-14">
-          <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-hero-muted">Back to school. Back to sport.</p>
-          <h1 className="max-w-xl text-4xl font-semibold leading-[1.12] text-hero-foreground sm:text-5xl md:text-[56px]">VANSA<br />Sports League 2026</h1>
-          <p className="mt-4 text-xl font-medium text-hero-foreground md:text-2xl">Old friends. New rivalries.</p>
-          <p className="mt-3 max-w-[480px] text-sm leading-[1.75] text-hero-muted">Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women's throwball for the alumni of Vidyanikethan School, Bengaluru.</p>
-          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs font-medium text-hero-foreground sm:text-sm"><span className="flex items-center gap-2"><CalendarDays className="size-4" aria-hidden="true" />1 November 2026</span><span className="flex items-center gap-2"><MapPin className="size-4" aria-hidden="true" />Bengaluru</span></div>
-          <div className="mt-5 flex items-center gap-4 text-xs text-hero-muted"><span>Men's Football</span><span className="h-3 border-l border-hero-muted/40" aria-hidden="true" /><span>Women's Throwball</span></div>
-        </div>
+      <section className="mx-auto max-w-[824px] px-5 pb-9 pt-10 sm:px-8 sm:pt-14" aria-labelledby="event-title">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">Back to school. Back to sport.</p>
+        <h1 id="event-title" className="mt-4 max-w-[16ch] text-[38px] font-semibold leading-[1.05] tracking-[-0.01em] text-primary sm:text-[52px]">VANSA Sports League 2026</h1>
+        <p className="mt-4 text-lg font-medium text-foreground sm:text-xl">Old friends. New rivalries.</p>
+        <p className="mt-3 max-w-[540px] text-sm leading-[1.75] text-muted-foreground">Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women's throwball for the alumni of Vidyanikethan School, Bengaluru.</p>
+        <p className="mt-7 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border pt-4 text-xs font-medium text-foreground sm:text-sm"><span>1 November 2026</span><span aria-hidden="true" className="text-muted-foreground">·</span><span>Bengaluru</span><span aria-hidden="true" className="text-muted-foreground">·</span><span>Men's Football &amp; Women's Throwball</span></p>
       </section>
-      <section className="mx-auto max-w-[824px] px-5 pb-16 pt-7 sm:px-8 sm:pt-12" aria-labelledby="registration-title">
+      <section className="mx-auto max-w-[824px] px-5 pb-16 pt-1 sm:px-8 sm:pt-2" aria-labelledby="registration-title">
         <div className="mb-7"><p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">One team. One more memory.</p><h2 id="registration-title" className="text-[28px] font-semibold text-primary sm:text-[32px]">Bring your team to the pitch.</h2><p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">Please complete the form below to confirm your participation. All fields are mandatory.</p></div>
         <RegistrationForm />
       </section>
