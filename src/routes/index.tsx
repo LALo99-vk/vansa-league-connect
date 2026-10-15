@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return <div className="min-h-screen">
     <header className="border-b bg-background">
-      <div className="mx-auto flex min-h-22 max-w-6xl items-center justify-between gap-4 px-6 md:px-10">
+      <div className="mx-auto flex min-h-18 max-w-6xl items-center justify-between gap-4 px-6 sm:min-h-22 md:px-10">
         <div><p className="text-base font-semibold text-primary sm:text-lg">Vidyanikethan School</p><p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Bengaluru · Alumni community</p></div>
         <p className="hidden text-xs font-medium text-primary sm:block">VANSA Sports League <span className="ml-1 text-muted-foreground">2026</span></p>
         <p className="text-right text-[10px] font-medium leading-4 text-primary sm:hidden">VANSA<br />2026</p>
@@ -28,7 +28,7 @@ function Index() {
       <section className="event-hero relative isolate overflow-hidden">
         <img src={pitch} alt="A sunlit football pitch with a white goal and tree-lined school grounds" width={1920} height={1024} fetchPriority="high" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 -z-10 bg-hero-overlay" />
-        <div className="mx-auto max-w-6xl px-6 py-10 md:px-10 md:py-14">
+        <div className="mx-auto max-w-6xl px-6 py-7 sm:py-10 md:px-10 md:py-14">
           <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-hero-muted">Back to school. Back to sport.</p>
           <h1 className="max-w-xl text-4xl font-semibold leading-[1.12] text-hero-foreground sm:text-5xl md:text-[56px]">VANSA<br />Sports League 2026</h1>
           <p className="mt-4 text-xl font-medium text-hero-foreground md:text-2xl">Old friends. New rivalries.</p>
@@ -37,7 +37,7 @@ function Index() {
           <div className="mt-5 flex items-center gap-4 text-xs text-hero-muted"><span>Men's Football</span><span className="h-3 border-l border-hero-muted/40" aria-hidden="true" /><span>Women's Throwball</span></div>
         </div>
       </section>
-      <section className="mx-auto max-w-[824px] px-5 pb-16 pt-10 sm:px-8 sm:pt-12" aria-labelledby="registration-title">
+      <section className="mx-auto max-w-[824px] px-5 pb-16 pt-7 sm:px-8 sm:pt-12" aria-labelledby="registration-title">
         <div className="mb-7"><p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">One team. One more memory.</p><h2 id="registration-title" className="text-[28px] font-semibold text-primary sm:text-[32px]">Bring your team to the pitch.</h2><p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">Please complete the form below to confirm your participation. All fields are mandatory.</p></div>
         <RegistrationForm />
       </section>

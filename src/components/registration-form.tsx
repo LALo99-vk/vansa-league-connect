@@ -7,7 +7,7 @@ type FieldName = keyof RegistrationData;
 type Errors = Partial<Record<FieldName, string>>;
 
 function Field({ name, label, error, type = "text", placeholder, autoComplete, inputMode, maxLength = 100 }: {
-  name: FieldName; label: string; error?: string; type?: string; placeholder: string; autoComplete?: string; inputMode?: "numeric" | "tel" | "email"; maxLength?: number;
+  name: FieldName; label: string; error?: string | undefined; type?: string; placeholder: string; autoComplete?: string; inputMode?: "numeric" | "tel" | "email"; maxLength?: number;
 }) {
   return <div className="min-w-0">
     <label htmlFor={name} className="mb-2 block text-sm font-medium">{label}</label>
@@ -46,7 +46,8 @@ export function RegistrationForm() {
         if (!nextErrors[field]) nextErrors[field] = issue.message;
       }
       setErrors(nextErrors);
-      const firstField = form.elements.namedItem(Object.keys(nextErrors)[0]);
+      const firstName = Object.keys(nextErrors)[0];
+      const firstField = firstName ? form.elements.namedItem(firstName) : null;
       if (firstField instanceof HTMLElement) firstField.focus();
       return;
     }
