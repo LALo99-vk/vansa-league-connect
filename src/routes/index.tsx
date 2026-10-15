@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { RegistrationForm } from "@/components/registration-form";
 import schoolLogo from "@/assets/vidyaniketan-logo.png";
 import schoolWordmark from "@/assets/vidyaniketan-wordmark.png";
+import athletiqLogo from "@/assets/athletiq-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -74,12 +75,15 @@ function Index() {
       </section>
       <div className="mx-auto max-w-[720px] px-5 pb-16 pt-10 sm:px-8 sm:pt-12">
         <RegistrationForm />
+        <p className="mt-12 flex items-center justify-center gap-2.5 text-xs text-muted-foreground">Powered by <img src={athletiqLogo} alt="AthletIQ" className="h-4 w-auto" /></p>
       </div>
     </main>
     <footer className="bg-maroon text-white">
-      <div className="mx-auto flex max-w-[720px] flex-col gap-1 px-5 py-6 text-sm sm:flex-row sm:justify-between sm:px-8">
-        <p>Questions? Call Manas on <a href="tel:+919902490638" className="whitespace-nowrap font-medium underline decoration-white/40 underline-offset-4 hover:decoration-white">+91 99024 90638</a></p>
-        <p className="text-white/70">Vidyanikethan School, Bengaluru</p>
+      <div className="mx-auto max-w-[720px] px-5 py-6 text-sm sm:px-8">
+        <div>
+          <p>Questions? Call Manas on <a href="tel:+919902490638" className="whitespace-nowrap font-medium underline decoration-white/40 underline-offset-4 hover:decoration-white">+91 99024 90638</a></p>
+          <p className="mt-1 text-white/70">Vidyanikethan School, Bengaluru</p>
+        </div>
       </div>
     </footer>
   </div>;
