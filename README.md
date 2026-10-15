@@ -140,23 +140,20 @@ Use only subtle hover and focus states where useful for accessibility. Prioritis
 
 **Final goal:** A calm, polished, trustworthy alumni sports registration website that feels connected to Vidyanikethan School, has a distinct sporting identity, and makes registering an entire team effortless on a mobile phone.
 
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5aee2335-2b30-4639-a74e-3264424425c0).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js 22.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+git clone https://github.com/LALo99-vk/vansa-league-connect.git
+cd vansa-league-connect
+npm install --legacy-peer-deps --no-package-lock   # plain `npm i` crashes on a peer-dependency bug
+cp .env.example .env                                # then fill in the Google Sheet id and service account
 npm run dev
+```
+
+Registrations are saved to the Google Sheet in `GOOGLE_SHEETS_ID`. To create its tabs:
+
+```sh
+node --experimental-strip-types --env-file=.env scripts/setup-sheet.ts
 ```
