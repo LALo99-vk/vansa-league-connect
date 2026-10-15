@@ -26,6 +26,8 @@ describe("VANSA registration", () => {
   it("validates email, year and the two sports", () => {
     expect(registrationSchema.safeParse({ ...entry, email: "invalid" }).success).toBe(false);
     expect(registrationSchema.safeParse({ ...entry, batch: "2027" }).success).toBe(false);
+    expect(registrationSchema.safeParse({ ...entry, batch: "12" }).success).toBe(false);
+    expect(registrationSchema.safeParse({ ...entry, batch: "1979" }).success).toBe(true);
     expect(registrationSchema.safeParse({ ...entry, sport: "Cricket" }).success).toBe(false);
     for (const sport of SPORT_OPTIONS) expect(registrationSchema.safeParse({ ...entry, sport }).success).toBe(true);
     expect(PLAYER_COUNT).toBe(6);

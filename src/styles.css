@@ -19,7 +19,8 @@
  */
 
 @theme inline {
-  --font-sans: "DM Sans", sans-serif;
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -60,29 +61,36 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-maroon: var(--maroon);
+  --color-gold: var(--gold);
+  --color-navy-deep: var(--navy-deep);
 }
 
 :root {
   --radius: 0.375rem;
-  --background: oklch(0.978 0.007 90);
-  --foreground: oklch(0.27 0.013 160);
+  /* Vidyanikethan School palette: navy #0a2c6d, maroon #8b0000, gold #f5b400 */
+  --background: oklch(0.966 0.006 264);
+  --foreground: oklch(0.257 0.032 266);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.257 0.032 266);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.32 0.065 161);
+  --primary: oklch(0.315 0.12 261.7);
   --primary-foreground: oklch(0.984 0.003 247.858);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.96 0.008 100);
-  --muted-foreground: oklch(0.49 0.016 150);
-  --accent: oklch(0.94 0.023 140);
+  --muted: oklch(0.96 0.006 95);
+  --muted-foreground: oklch(0.502 0.029 263.2);
+  --accent: oklch(0.945 0.012 259.8);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.9 0.008 110);
-  --input: oklch(0.87 0.008 110);
-  --ring: oklch(0.45 0.07 160);
+  --border: oklch(0.909 0.01 261.8);
+  --input: oklch(0.87 0.012 261.8);
+  --ring: oklch(0.473 0.124 258.7);
+  --maroon: oklch(0.4 0.164 29.2);
+  --gold: oklch(0.809 0.167 82.3);
+  --navy-deep: oklch(0.257 0.08 261.2);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -150,16 +158,17 @@
 .registration-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 32px;
+  border-top: 4px solid var(--primary);
+  border-radius: 4px;
+  padding: 28px 32px 32px;
 }
 .registration-input {
   width: 100%;
-  height: 48px;
+  height: 44px;
   border: 1px solid var(--input);
-  border-radius: 4px;
+  border-radius: 3px;
   background: var(--card);
-  padding: 0 14px;
+  padding: 0 12px;
   font-size: 14px;
   color: var(--foreground);
   outline: none;
@@ -169,22 +178,41 @@
 .registration-input:focus { border-color: var(--ring); outline: 2px solid color-mix(in oklch, var(--ring) 15%, transparent); outline-offset: 1px; }
 .registration-input[aria-invalid="true"] { border-color: var(--destructive); }
 .sport-option {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 50px;
-  padding: 12px 14px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
   border: 1px solid var(--input);
   border-radius: 4px;
-  font-size: 14px;
   cursor: pointer;
+  transition: background-color 120ms, color 120ms, border-color 120ms;
 }
-.sport-option:has(input:checked) { background: var(--accent); border-color: var(--primary); }
+.sport-option:hover { border-color: var(--primary); }
+.sport-option:has(input:checked) { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+.sport-option:has(input:checked) .sport-option-sub { color: var(--gold); }
 .sport-option:has(input:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+.jersey { width: 36px; height: 32px; flex-shrink: 0; color: var(--primary); }
 @media (max-width: 639px) {
   .registration-card { padding: 24px 20px; }
   .registration-input { font-size: 16px; }
 }
+/* Hero emblem: the podium steps rise, the figure lands, then the cap drops on. Plays once on load. */
+.emblem-step { animation: emblem-rise 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both; transform-box: fill-box; }
+.emblem-figure { animation: emblem-land 520ms cubic-bezier(0.2, 0.8, 0.25, 1.15) 380ms both; transform-box: view-box; transform-origin: 254px 420px; }
+.emblem-cap { animation: emblem-cap 560ms cubic-bezier(0.25, 0.8, 0.3, 1.2) 820ms both; transform-box: view-box; transform-origin: 252px 20px; }
+/* Clicking the emblem tosses the cap up with a spin; it lands back with a small bounce. */
+.emblem-cap-toss { animation: emblem-cap-toss 950ms cubic-bezier(0.3, 0.6, 0.4, 1) both; transform-box: view-box; transform-origin: 252px 20px; }
+@keyframes emblem-cap-toss {
+  0% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-120px) rotate(-200deg); }
+  78% { transform: translateY(0) rotate(-360deg); }
+  88% { transform: translateY(-10px) rotate(-360deg); }
+  100% { transform: translateY(0) rotate(-360deg); }
+}
+@keyframes emblem-rise { from { opacity: 0; transform: translateY(18px); } }
+@keyframes emblem-land { from { opacity: 0; transform: translateY(-26px) scale(0.94); } }
+@keyframes emblem-cap { from { opacity: 0; transform: translateY(-60px) rotate(-30deg); } }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition: none !important; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
 }

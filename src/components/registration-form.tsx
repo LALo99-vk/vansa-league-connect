@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, Check, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLAYER_COUNT, SPORT_OPTIONS, isRegistrationClosed, registrationSchema, type RegistrationData } from "@/lib/registration";
+import type { SaveResult } from "@/lib/registration-store";
+import { REGISTRATION_CLOSED, submitRegistration } from "@/lib/submit-registration";
 
 type FieldName = keyof RegistrationData;
 type Errors = Partial<Record<FieldName, string>>;
@@ -10,20 +11,33 @@ function Field({ name, label, error, type = "text", placeholder, autoComplete, i
   name: FieldName; label: string; error?: string | undefined; type?: string; placeholder: string; autoComplete?: string; inputMode?: "numeric" | "tel" | "email"; maxLength?: number;
 }) {
   return <div className="min-w-0">
-    <label htmlFor={name} className="mb-2 block text-sm font-medium">{label}</label>
+    <label htmlFor={name} className="mb-2 block text-sm font-medium">{label}<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></label>
     <input id={name} name={name} type={type} required maxLength={maxLength} placeholder={placeholder} autoComplete={autoComplete} inputMode={inputMode} aria-invalid={Boolean(error)} aria-describedby={error ? `${name}-error` : undefined} className="registration-input" />
     {error && <p id={`${name}-error`} className="mt-1.5 text-xs text-destructive">{error}</p>}
   </div>;
 }
 
-function SectionHeading({ number, children }: { number: string; children: React.ReactNode }) {
-  return <h3 className="mb-6 flex items-center gap-3 text-lg font-semibold"><span className="text-sm font-normal text-muted-foreground">{number}</span><span className="h-px w-4 bg-border" aria-hidden="true" />{children}</h3>;
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <h3 className="mb-4 text-[15px] font-semibold text-primary">{children}</h3>;
+}
+
+const SPORT_LABELS: Record<(typeof SPORT_OPTIONS)[number], [string, string]> = {
+  "Men's Football": ["Football", "Men's team"],
+  "Women's Throwball": ["Throwball", "Women's team"],
+};
+
+function Jersey({ number }: { number: number }) {
+  return <svg viewBox="0 0 32 28" className="jersey" aria-hidden="true">
+    <path d="M10.5 1 4 4 0 10.5l5 3 2-2V27h18V11.5l2 2 5-3L28 4l-6.5-3C20.7 3.4 18.6 5 16 5s-4.7-1.6-5.5-4Z" fill="currentColor" />
+    <text x="16" y="22.5" textAnchor="middle" fill="white" fontSize="15" fontWeight="800" fontFamily="'Big Shoulders Display', sans-serif">{number}</text>
+  </svg>;
 }
 
 export function RegistrationForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [saved, setSaved] = useState<SaveResult | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [closed, setClosed] = useState(false);
 
   useEffect(() => {
@@ -46,54 +60,83 @@ export function RegistrationForm() {
         if (!nextErrors[field]) nextErrors[field] = issue.message;
       }
       setErrors(nextErrors);
-      const firstName = Object.keys(nextErrors)[0];
-      const firstField = firstName ? form.elements.namedItem(firstName) : null;
+      // Focus the first invalid field in page order, not schema order.
+      const firstField = Array.from(form.elements).find((el) => (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) && el.name in nextErrors);
       if (firstField instanceof HTMLElement) firstField.focus();
       return;
     }
     setErrors({});
+    setSaveFailed(false);
     setSubmitting(true);
     try {
-      // Prototype only: no storage, network request, or actual registration update.
-      console.log(result.data);
-      await new Promise<void>((resolve) => window.setTimeout(resolve, 350));
-      setSubmitted(true);
+      // Resolves only after the sheet has confirmed the save; anything else is a failure.
+      setSaved(await submitRegistration({ data: result.data }));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes(REGISTRATION_CLOSED)) setClosed(true);
+      else setSaveFailed(true);
     } finally { setSubmitting(false); }
   }
 
-  if (closed && !submitted) return <div className="registration-card py-12" role="status"><h2 className="text-2xl font-semibold text-primary">Registrations are now closed.</h2><p className="mt-4 leading-7 text-muted-foreground">For queries, contact Manas: <a className="text-primary underline underline-offset-4" href="tel:+919902490638">+91 9902490638</a>.</p></div>;
+  if (closed && !saved) return <div className="registration-card" role="status"><h2 className="font-display text-4xl font-extrabold text-primary">Registrations are closed</h2><p className="mt-3 leading-7 text-muted-foreground">For queries, call Manas on <a className="text-primary underline underline-offset-4" href="tel:+919902490638">+91 99024 90638</a>.</p></div>;
 
-  if (submitted) return <div className="registration-card py-12" role="status"><Check className="mb-5 size-8 text-primary" aria-hidden="true" /><h2 className="text-2xl font-semibold text-primary">Thank you for registering!</h2><p className="mt-4 leading-7 text-muted-foreground">Your entry for the VANSA Sports League 2026 has been received. Fixtures and team details will be shared with you on WhatsApp and email closer to the event. See you on the pitch!</p></div>;
+  if (saved) return <div className="registration-card" role="status">
+    <h2 className="font-display text-4xl font-extrabold text-primary">Thank you for registering!</h2>
+    <p className="mt-3 leading-7 text-muted-foreground">Your entry for the VANSA Sports League 2026 has been received. Fixtures and team details will be shared with you on WhatsApp and email closer to the event. See you on the pitch!</p>
+    <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 border-l-[3px] border-l-gold pl-4 text-sm">
+      <dt className="text-muted-foreground">Reference</dt><dd className="font-semibold tracking-wide text-foreground">{saved.reference}</dd>
+      <dt className="text-muted-foreground">Saved at</dt><dd className="text-foreground">{saved.savedAt} IST</dd>
+    </dl>
+    <p className="mt-2 text-xs text-muted-foreground">Take a screenshot of this page and keep the reference in case you need to contact the organisers.</p>
+    <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => setSaved(null)}>Back to registration form</Button>
+  </div>;
 
-  return <form className="registration-card" onSubmit={handleSubmit} noValidate>
+  return <form className="registration-card" onSubmit={handleSubmit} noValidate aria-labelledby="sheet-title">
+    <div className="mb-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="sheet-title" className="font-display text-[40px] font-extrabold leading-none text-primary">Registration form</h2>
+      <p className="text-sm text-muted-foreground"><span className="text-maroon" aria-hidden="true">*</span> All fields are required</p>
+    </div>
+    <p className="-mt-4 mb-7 text-sm font-medium text-foreground">Registrations close on 27th October 2026.</p>
     <fieldset disabled={submitting} className="min-w-0">
-      <section aria-labelledby="captain-section">
-        <div id="captain-section"><SectionHeading number="01">Captain Details</SectionHeading></div>
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-          <Field name="captainName" label="Full Name" placeholder="Captain’s full name" autoComplete="name" error={errors.captainName} />
-          <Field name="phone" label="Contact Number" placeholder="10-digit mobile number" type="tel" inputMode="tel" autoComplete="tel-national" maxLength={20} error={errors.phone} />
-          <Field name="email" label="Email ID" placeholder="you@example.com" type="email" inputMode="email" autoComplete="email" maxLength={255} error={errors.email} />
-          <Field name="batch" label="Batch (year graduated)" placeholder="e.g. 2018" inputMode="numeric" maxLength={8} error={errors.batch} />
+      <fieldset>
+        <legend className="mb-3 text-[15px] font-semibold text-primary">Sport<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></legend>
+        <div className="grid grid-cols-2 gap-3">{SPORT_OPTIONS.map((sport) => <label key={sport} className="sport-option">
+          <input type="radio" name="sport" value={sport} required className="sr-only" aria-invalid={Boolean(errors.sport)} aria-describedby={errors.sport ? "sport-error" : undefined} />
+          <span className="font-display text-[26px] font-extrabold leading-none">{SPORT_LABELS[sport][0]}</span>
+          <span className="sport-option-sub text-xs text-muted-foreground">{SPORT_LABELS[sport][1]}</span>
+        </label>)}</div>
+        {errors.sport && <p id="sport-error" className="mt-1.5 text-xs text-destructive">{errors.sport}</p>}
+      </fieldset>
+      <div className="mt-6"><Field name="teamName" label="Team name" placeholder="" error={errors.teamName} /></div>
+      <section className="mt-9">
+        <SectionHeading>Captain</SectionHeading>
+        <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+          <Field name="captainName" label="Full name" placeholder="" autoComplete="name" error={errors.captainName} />
+          <Field name="phone" label="Contact number" placeholder="10-digit mobile" type="tel" inputMode="tel" autoComplete="tel-national" maxLength={20} error={errors.phone} />
+          <Field name="email" label="Email ID" placeholder="" type="email" inputMode="email" autoComplete="email" maxLength={255} error={errors.email} />
+          <Field name="batch" label="Batch (year you graduated)" placeholder="e.g. 2012" inputMode="numeric" maxLength={4} error={errors.batch} />
         </div>
+        <p className="mt-3 text-xs text-muted-foreground">Fixtures will be sent to this number on WhatsApp and to this email.</p>
       </section>
-      <section className="mt-8 border-t pt-8" aria-labelledby="team-section">
-        <div id="team-section"><SectionHeading number="02">Team Details</SectionHeading></div>
-        <Field name="teamName" label="Team Name" placeholder="Your team’s name" error={errors.teamName} />
-        <fieldset className="mt-5"><legend className="mb-2 text-sm font-medium">Sport</legend>
-          <div className="grid gap-3 sm:grid-cols-2">{SPORT_OPTIONS.map((sport) => <label key={sport} className="sport-option"><input type="radio" name="sport" value={sport} required className="size-4 shrink-0 accent-primary" aria-invalid={Boolean(errors.sport)} aria-describedby={errors.sport ? "sport-error" : undefined} /><span>{sport}</span></label>)}</div>
-          {errors.sport && <p id="sport-error" className="mt-1.5 text-xs text-destructive">{errors.sport}</p>}
-        </fieldset>
-      </section>
-      <section className="mt-8 border-t pt-8" aria-labelledby="players-section">
-        <div id="players-section"><SectionHeading number="03">Players</SectionHeading></div>
-        <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">{Array.from({ length: PLAYER_COUNT }, (_, index) => {
+      <section className="mt-9">
+        <SectionHeading>Players<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></SectionHeading>
+        <ol className="space-y-3">{Array.from({ length: PLAYER_COUNT }, (_, index) => {
           const name = `player${index + 1}` as FieldName;
-          return <Field key={name} name={name} label={`Player ${index + 1} Name`} placeholder="Player’s full name" error={errors[name]} />;
-        })}</div>
+          const error = errors[name];
+          return <li key={name}>
+            <div className="flex items-center gap-3">
+              <label htmlFor={name} className="shrink-0"><span className="sr-only">Player {index + 1} name</span><Jersey number={index + 1} /></label>
+              <input id={name} name={name} type="text" required maxLength={100} placeholder="Full name *" aria-invalid={Boolean(error)} aria-describedby={error ? `${name}-error` : undefined} className="registration-input" />
+            </div>
+            {error && <p id={`${name}-error`} className="ml-12 mt-1.5 text-xs text-destructive">{error}</p>}
+          </li>;
+        })}</ol>
       </section>
-      <Button type="submit" className="mt-8 h-13 w-full rounded-sm text-[15px] font-semibold shadow-none" disabled={submitting}>{submitting ? "Submitting…" : "Register My Team"}<ArrowRight className="ml-2" aria-hidden="true" /></Button>
-      <p className="mx-auto mt-4 max-w-md text-center text-xs leading-5 text-muted-foreground">Already registered? Submitting again with the same contact number updates your team.</p>
+      <div className="mt-10">
+        {saveFailed && <div role="alert" className="mb-5 rounded-sm border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm leading-6 text-foreground"><p className="font-semibold text-destructive">Your registration was not saved.</p><p>Your details are still filled in. Check your internet connection and press Register team again. If it keeps failing, call Manas on <a className="whitespace-nowrap font-medium text-primary underline underline-offset-4" href="tel:+919902490638">+91 99024 90638</a>.</p></div>}
+        <Button type="submit" className="h-12 w-full rounded-sm px-10 text-[15px] font-semibold shadow-none sm:w-auto" disabled={submitting}>{submitting ? "Registering…" : "Register team"}</Button>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">Need to change something later? Register again with the same sport and contact number, and your entry will be updated. The sport and contact number themselves can't be changed. For that, call Manas on <a className="whitespace-nowrap text-primary underline underline-offset-4" href="tel:+919902490638">+91 99024 90638</a>.</p>
+      </div>
     </fieldset>
-    <div className="mt-7 flex items-center justify-center gap-2 border-t pt-5 text-xs text-muted-foreground"><CalendarDays className="size-3.5" aria-hidden="true" />Registrations close 27 October 2026.</div>
   </form>;
 }
