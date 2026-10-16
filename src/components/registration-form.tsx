@@ -87,7 +87,6 @@ export function RegistrationForm() {
       <dt className="text-muted-foreground">Reference</dt><dd className="font-semibold tracking-wide text-foreground">{saved.reference}</dd>
       <dt className="text-muted-foreground">Saved at</dt><dd className="text-foreground">{saved.savedAt} IST</dd>
     </dl>
-    <p className="mt-2 text-xs text-muted-foreground">Take a screenshot of this page and keep the reference in case you need to contact the organisers.</p>
     <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => setSaved(null)}>Back to registration form</Button>
   </div>;
 

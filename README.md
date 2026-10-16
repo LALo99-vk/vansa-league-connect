@@ -1,6 +1,6 @@
 # VANSA League Connect
 
-Design a clean, premium, mobile-first team registration website for **VANSA Sports League 2026**, an alumni sports event organised by Vidyanikethan School, Bengaluru.
+Design a clean, premium, mobile-first team registration website for **VANSA Sports League 2026**, an alumni sports event organised by Vidyaniketan School, Bengaluru.
 
 ## Design Direction
 
@@ -18,7 +18,7 @@ Create a calm, elegant, human-designed website that feels professional, welcomin
 ## Page Structure
 
 ### 1. Header
-A minimal header containing the Vidyanikethan School name or official logo if available, alongside a small VANSA Sports League 2026 label. Keep the header compact, particularly on mobile.
+A minimal header containing the Vidyaniketan School name or official logo if available, alongside a small VANSA Sports League 2026 label. Keep the header compact, particularly on mobile.
 
 ### 2. Hero Section
 Create a simple, editorial-style hero with the heading:
@@ -27,7 +27,7 @@ Create a simple, editorial-style hero with the heading:
 
 Supporting headline: "Old friends. New rivalries."
 
-Description: "Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women's throwball for the alumni of Vidyanikethan School, Bengaluru."
+Description: "Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women's throwball for the alumni of Vidyaniketan School, Bengaluru."
 
 Display the event date, **1 November 2026**, and venue context, Bengaluru, in a subtle information row.
 
@@ -138,7 +138,7 @@ Do not add:
 
 Use only subtle hover and focus states where useful for accessibility. Prioritise clarity, consistency, performance, and usability over decoration.
 
-**Final goal:** A calm, polished, trustworthy alumni sports registration website that feels connected to Vidyanikethan School, has a distinct sporting identity, and makes registering an entire team effortless on a mobile phone.
+**Final goal:** A calm, polished, trustworthy alumni sports registration website that feels connected to Vidyaniketan School, has a distinct sporting identity, and makes registering an entire team effortless on a mobile phone.
 
 ## Development
 
