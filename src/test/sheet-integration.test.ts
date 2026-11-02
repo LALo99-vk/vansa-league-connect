@@ -12,22 +12,22 @@ import type { RegistrationData } from "@/lib/registration";
 // Test entries use this contact-number prefix so cleanup can't touch real rows.
 const TEST_PREFIX = "900000";
 const FOOTBALL = SPORT_TABS["Men's Football"];
-const THROWBALL = SPORT_TABS["Women's Throwball"];
+const VOLLEYBALL = SPORT_TABS["Women's Volleyball"];
 
 const entry = (phone: string, overrides: Partial<RegistrationData> = {}): RegistrationData => ({
-  captainName: "Test Captain", phone: `${TEST_PREFIX}${phone}`, email: "test@example.com", batch: "2012",
+  captainName: "Test Captain", phone: `${TEST_PREFIX}${phone}`, email: "test@example.com", registrantType: "Alumni", batch: "2012", studentClass: "",
   teamName: `Test Team ${phone}`, sport: "Men's Football",
   player1: "P One", player2: "P Two", player3: "P Three", player4: "P Four", player5: "P Five", player6: "P Six",
   ...overrides,
 });
 
 const rows = async (tab: string) =>
-  (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab, "A2:O")}?valueRenderOption=FORMATTED_VALUE`)).values ?? [];
+  (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab, "A2:Q")}?valueRenderOption=FORMATTED_VALUE`)).values ?? [];
 const isTest = (row: string[], contactColumn: number) => row[contactColumn]?.startsWith(TEST_PREFIX) ?? false;
 
 async function deleteTestRows() {
   const meta = await sheetsApi<{ sheets: { properties: { sheetId: number; title: string } }[] }>("?fields=sheets(properties(sheetId,title))");
-  for (const [tab, contactColumn] of [[FOOTBALL, TEAM_COL.contact], [THROWBALL, TEAM_COL.contact], [LOG_TAB, 6]] as const) {
+  for (const [tab, contactColumn] of [[FOOTBALL, TEAM_COL.contact], [VOLLEYBALL, TEAM_COL.contact], [LOG_TAB, 6]] as const) {
     const sheetId = meta.sheets.find((s) => s.properties.title === tab)!.properties.sheetId;
     const indexes = (await rows(tab)).flatMap((row, index) => (isTest(row, contactColumn) ? [index + 1] : [])).reverse();
     if (!indexes.length) continue;
@@ -41,7 +41,7 @@ async function deleteTestRows() {
 describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the real sheet", { timeout: 120_000 }, () => {
   afterAll(async () => {
     await deleteTestRows();
-    for (const [tab, column] of [[FOOTBALL, TEAM_COL.contact], [THROWBALL, TEAM_COL.contact], [LOG_TAB, 6]] as const) {
+    for (const [tab, column] of [[FOOTBALL, TEAM_COL.contact], [VOLLEYBALL, TEAM_COL.contact], [LOG_TAB, 6]] as const) {
       expect((await rows(tab)).filter((row) => isTest(row, column))).toHaveLength(0);
     }
   }, 120_000);
@@ -53,7 +53,7 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
 
     const team = (await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000001");
     expect(team).toHaveLength(1);
-    expect(team[0]!.slice(0, 11)).toEqual(["Test Team 0001", "Test Captain", "9000000001", "test@example.com", "2012", "P One", "P Two", "P Three", "P Four", "P Five", "P Six"]);
+    expect(team[0]!.slice(0, 13)).toEqual(["Test Team 0001", "Test Captain", "9000000001", "test@example.com", "Alumni", "2012", "", "P One", "P Two", "P Three", "P Four", "P Five", "P Six"]);
     expect(team[0]![TEAM_COL.timesUpdated]).toBe("0");
     expect(team[0]![TEAM_COL.reference]).toBe(result.reference);
 
@@ -68,7 +68,7 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
 
     const team = (await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000001");
     expect(team).toHaveLength(1);
-    expect(team[0]![10]).toBe("New Sixth Player");
+    expect(team[0]![12]).toBe("New Sixth Player");
     expect(team[0]![TEAM_COL.registeredAt]).toBe(first[TEAM_COL.registeredAt]);
     expect(team[0]![TEAM_COL.timesUpdated]).toBe("1");
 
@@ -76,9 +76,16 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
     expect((await rows(LOG_TAB)).filter((r) => r[6] === "9000000001").map((r) => r[2])).toEqual(["Yes, new team", "Yes, updated team"]);
   });
 
-  it("puts throwball teams in their own tab", async () => {
-    await saveRegistration(entry("0002", { sport: "Women's Throwball" }));
-    expect((await rows(THROWBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(1);
+  it("saves a current student's class and leaves the batch blank", async () => {
+    await saveRegistration(entry("0003", { registrantType: "Current student", batch: "", studentClass: "12th" }));
+    const row = (await rows(FOOTBALL)).find((r) => r[TEAM_COL.contact] === "9000000003");
+    expect(row?.slice(4, 7)).toEqual(["Current student", "", "12th"]);
+    expect(row?.[7]).toBe("P One");
+  });
+
+  it("puts volleyball teams in their own tab", async () => {
+    await saveRegistration(entry("0002", { sport: "Women's Volleyball" }));
+    expect((await rows(VOLLEYBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(1);
     expect((await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(0);
   });
 

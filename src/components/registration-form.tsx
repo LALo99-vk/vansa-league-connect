@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { PLAYER_COUNT, SPORT_OPTIONS, isRegistrationClosed, registrationSchema, type RegistrationData } from "@/lib/registration";
+import { PLAYER_COUNT, REGISTRANT_TYPES, SPORT_OPTIONS, STUDENT_CLASSES, isRegistrationClosed, registrationSchema, type RegistrationData } from "@/lib/registration";
 import type { SaveResult } from "@/lib/registration-store";
 import { REGISTRATION_CLOSED, submitRegistration } from "@/lib/submit-registration";
 
@@ -23,7 +23,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 const SPORT_LABELS: Record<(typeof SPORT_OPTIONS)[number], [string, string]> = {
   "Men's Football": ["Football", "Men's team"],
-  "Women's Throwball": ["Throwball", "Women's team"],
+  "Women's Volleyball": ["Volleyball", "Women's team · 10:30 AM to 1 PM, then lunch"],
 };
 
 function Jersey({ number }: { number: number }) {
@@ -39,6 +39,7 @@ export function RegistrationForm() {
   const [saved, setSaved] = useState<SaveResult | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const [closed, setClosed] = useState(false);
+  const [registrantType, setRegistrantType] = useState<string>("");
 
   useEffect(() => {
     const update = () => setClosed(isRegistrationClosed());
@@ -112,8 +113,24 @@ export function RegistrationForm() {
           <Field name="captainName" label="Full name" placeholder="" autoComplete="name" error={errors.captainName} />
           <Field name="phone" label="Contact number" placeholder="10-digit mobile" type="tel" inputMode="tel" autoComplete="tel-national" maxLength={20} error={errors.phone} />
           <Field name="email" label="Email ID" placeholder="" type="email" inputMode="email" autoComplete="email" maxLength={255} error={errors.email} />
-          <Field name="batch" label="Batch (year you graduated)" placeholder="e.g. 2012" inputMode="numeric" maxLength={4} error={errors.batch} />
         </div>
+        <fieldset className="mt-5">
+          <legend className="mb-2 text-sm font-medium">I am registering as<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></legend>
+          <div className="grid grid-cols-2 gap-3">{REGISTRANT_TYPES.map((type) => <label key={type} className="sport-option">
+            <input type="radio" name="registrantType" value={type} required className="sr-only" checked={registrantType === type} onChange={() => setRegistrantType(type)} aria-invalid={Boolean(errors.registrantType)} />
+            <span className="font-display text-[22px] font-extrabold leading-none">{type}</span>
+          </label>)}</div>
+          {errors.registrantType && <p className="mt-1.5 text-xs text-destructive">{errors.registrantType}</p>}
+        </fieldset>
+        {registrantType === "Alumni" && <div className="mt-4 sm:max-w-[calc(50%-10px)]"><Field name="batch" label="Batch (year you graduated)" placeholder="e.g. 2012" inputMode="numeric" maxLength={4} error={errors.batch} /></div>}
+        {registrantType === "Current student" && <div className="mt-4 sm:max-w-[calc(50%-10px)]">
+          <label htmlFor="studentClass" className="mb-2 block text-sm font-medium">Class<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></label>
+          <select id="studentClass" name="studentClass" required defaultValue="" aria-invalid={Boolean(errors.studentClass)} className="registration-input">
+            <option value="" disabled>Select your class</option>
+            {STUDENT_CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          {errors.studentClass && <p className="mt-1.5 text-xs text-destructive">{errors.studentClass}</p>}
+        </div>}
         <p className="mt-3 text-xs text-muted-foreground">Fixtures will be sent to this number on WhatsApp and to this email.</p>
       </section>
       <section className="mt-9">

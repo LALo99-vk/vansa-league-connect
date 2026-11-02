@@ -19,12 +19,12 @@ const MAROON = { red: 139 / 255, green: 0, blue: 0 };
 const GOLD = { red: 245 / 255, green: 180 / 255, blue: 0 };
 
 const PLAYER_WIDTH = 150;
-const TEAM_WIDTHS = [180, 170, 130, 220, 70, ...Array(6).fill(PLAYER_WIDTH), 160, 160, 110, 140];
-const LOG_WIDTHS = [130, 160, 150, 140, 180, 170, 130, 220, 70, ...Array(6).fill(PLAYER_WIDTH)];
+const TEAM_WIDTHS = [180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH), 160, 160, 110, 140];
+const LOG_WIDTHS = [130, 160, 150, 140, 180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH)];
 
 const tabs = [
   { title: SPORT_TABS["Men's Football"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: NAVY },
-  { title: SPORT_TABS["Women's Throwball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
+  { title: SPORT_TABS["Women's Volleyball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
   { title: LOG_TAB, headers: LOG_HEADERS, widths: LOG_WIDTHS, color: MAROON },
 ];
 
@@ -61,7 +61,7 @@ for (const tab of tabs) {
     await sheetsApi(`/values/${tabRange(tab.title, `A1:${lastColumn}1`)}?valueInputOption=RAW`, { method: "PUT", body: { values: [tab.headers] } });
   }
 
-  const textColumns = ["Contact number", "Batch"].map((name) => tab.headers.indexOf(name));
+  const textColumns = ["Contact number", "Batch", "Class"].map((name) => tab.headers.indexOf(name));
   await update([
     { updateSheetProperties: { properties: { sheetId, tabColor: tab.color, gridProperties: { frozenRowCount: 1 } }, fields: "tabColor,gridProperties.frozenRowCount" } },
     {

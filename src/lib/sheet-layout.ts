@@ -8,7 +8,7 @@
 
 export const SPORT_TABS = {
   "Men's Football": "Football (Men)",
-  "Women's Throwball": "Throwball (Women)",
+  "Women's Volleyball": "Volleyball (Women)",
 } as const;
 
 /** Every form submission, in the order received. Rows are only ever added. */
@@ -19,7 +19,9 @@ const DETAIL_HEADERS = [
   "Captain",
   "Contact number",
   "Email",
+  "Registering as",
   "Batch",
+  "Class",
   "Player 1",
   "Player 2",
   "Player 3",
@@ -42,12 +44,12 @@ export const LOG_HEADERS = ["Reference", "Received at (IST)", "Saved to team tab
 // Zero-based column positions the server relies on.
 export const TEAM_COL = {
   contact: 2,
-  registeredAt: 11,
-  timesUpdated: 13,
-  reference: 14,
+  registeredAt: 13,
+  timesUpdated: 15,
+  reference: 16,
 } as const;
 export const LOG_COL = { reference: 0 } as const;
 export const LOG_SAVED_COLUMN = "C"; // "Saved to team tab"
 
-export const TEAM_LAST_COLUMN = "O"; // TEAM_HEADERS.length === 15
-export const LOG_LAST_COLUMN = "O"; // LOG_HEADERS.length === 15
+export const TEAM_LAST_COLUMN = "Q"; // TEAM_HEADERS.length === 17
+export const LOG_LAST_COLUMN = "Q"; // LOG_HEADERS.length === 17

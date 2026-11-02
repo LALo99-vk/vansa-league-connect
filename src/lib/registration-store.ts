@@ -117,7 +117,7 @@ export function saveRegistration(data: RegistrationData): Promise<SaveResult> {
     const reference = newReference(now);
     const tab = SPORT_TABS[data.sport];
     const details = [
-      data.teamName, data.captainName, data.phone, data.email, data.batch,
+      data.teamName, data.captainName, data.phone, data.email, data.registrantType, data.batch, data.studentClass,
       data.player1, data.player2, data.player3, data.player4, data.player5, data.player6,
     ];
 
