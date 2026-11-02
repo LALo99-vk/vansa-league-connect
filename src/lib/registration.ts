@@ -2,12 +2,11 @@ import { z } from "zod";
 
 export const PLAYER_COUNT = 6;
 export const SPORT_OPTIONS = ["Men's Football", "Women's Throwball"] as const;
-export const REGISTRATION_CLOSING_DATE = "2026-10-27";
+// Closed by hand only, when the school says so: set to false. There is no automatic closing date.
+export const REGISTRATION_OPEN = true;
 // The school's first graduating batch is not known, so allow a generous range.
 export const BATCH_MIN_YEAR = 1950;
 export const BATCH_MAX_YEAR = 2026;
-// Registration remains open through midnight in Bengaluru (IST).
-export const REGISTRATION_CLOSES_AT = "2026-10-27T23:59:59.999+05:30";
 
 const requiredName = z.string().trim().min(1, "Please enter a name.").max(100, "Please use 100 characters or fewer.");
 
@@ -27,4 +26,4 @@ export const registrationSchema = z.object({
 });
 
 export type RegistrationData = z.infer<typeof registrationSchema>;
-export const isRegistrationClosed = (now = new Date()) => now.getTime() > new Date(REGISTRATION_CLOSES_AT).getTime();
+export const isRegistrationClosed = () => !REGISTRATION_OPEN;

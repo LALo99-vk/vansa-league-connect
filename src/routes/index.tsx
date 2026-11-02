@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
     { title: "VANSA Sports League 2026 | Team Registration" },
     { name: "description", content: "Register your alumni team for men's football or women's throwball at Vidyaniketan School's VANSA Sports League on 1 November 2026 in Bengaluru." },
     { property: "og:title", content: "VANSA Sports League 2026 · Team registration" },
-    { property: "og:description", content: "Join Vidyaniketan School alumni on the pitch in Bengaluru, 1 November 2026. Team registrations close 27 October." },
+    { property: "og:description", content: "Join Vidyaniketan School alumni on the pitch in Bengaluru, 1 November 2026. Register your team now." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),

@@ -32,8 +32,7 @@ describe("VANSA registration", () => {
     for (const sport of SPORT_OPTIONS) expect(registrationSchema.safeParse({ ...entry, sport }).success).toBe(true);
     expect(PLAYER_COUNT).toBe(6);
   });
-  it("closes only after 27 October ends in Bengaluru", () => {
-    expect(isRegistrationClosed(new Date("2026-10-27T23:59:59.999+05:30"))).toBe(false);
-    expect(isRegistrationClosed(new Date("2026-10-28T00:00:00+05:30"))).toBe(true);
+  it("stays open until closed by hand", () => {
+    expect(isRegistrationClosed()).toBe(false);
   });
 });

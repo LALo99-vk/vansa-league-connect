@@ -95,7 +95,6 @@ export function RegistrationForm() {
       <h2 id="sheet-title" className="font-display text-[40px] font-extrabold leading-none text-primary">Registration form</h2>
       <p className="text-sm text-muted-foreground"><span className="text-maroon" aria-hidden="true">*</span> All fields are required</p>
     </div>
-    <p className="-mt-4 mb-7 text-sm font-medium text-foreground">Registrations close on 27th October 2026.</p>
     <fieldset disabled={submitting} className="min-w-0">
       <fieldset>
         <legend className="mb-3 text-[15px] font-semibold text-primary">Sport<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></legend>
