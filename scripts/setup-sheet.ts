@@ -1,14 +1,14 @@
 // Creates the registration tabs, headers and formatting in the Google Sheet.
-// Safe to re-run: it only adds what is missing and refuses to overwrite a header
-// row that holds something else.
+// Safe to re-run: it only adds what is missing. A header row that holds something
+// else is replaced only while the tab has no data rows; otherwise the script stops.
 //
 //   node --experimental-strip-types --env-file=.env scripts/setup-sheet.ts
 import { sheetsApi, tabRange } from "../src/lib/google-sheets.ts";
-import { LOG_HEADERS, LOG_TAB, SPORT_TABS, TEAM_HEADERS } from "../src/lib/sheet-layout.ts";
+import { LOG_HEADERS, LOG_TAB, SOLO_HEADERS, SOLO_TABS, SPORT_TABS, TEAM_HEADERS } from "../src/lib/sheet-layout.ts";
 
 type SheetMeta = {
   properties: { sheetId: number; title: string };
-  bandedRanges?: unknown[];
+  bandedRanges?: { bandedRangeId: number }[];
   protectedRanges?: unknown[];
 };
 
@@ -19,12 +19,16 @@ const MAROON = { red: 139 / 255, green: 0, blue: 0 };
 const GOLD = { red: 245 / 255, green: 180 / 255, blue: 0 };
 
 const PLAYER_WIDTH = 150;
-const TEAM_WIDTHS = [180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH), 160, 160, 110, 140];
-const LOG_WIDTHS = [130, 160, 150, 140, 180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH)];
+const TRACKING_WIDTHS = [160, 160, 110, 140];
+const TEAM_WIDTHS = [180, 170, 130, 220, 130, 70, 70, 110, ...Array(6).fill(PLAYER_WIDTH), ...TRACKING_WIDTHS];
+const SOLO_WIDTHS = [170, 130, 220, 130, 70, 70, ...TRACKING_WIDTHS, 120];
+const LOG_WIDTHS = [130, 160, 170, 90, 180, 180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH)];
 
 const tabs = [
   { title: SPORT_TABS["Men's Football"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: NAVY },
   { title: SPORT_TABS["Women's Volleyball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
+  { title: SOLO_TABS["Men's Football"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: NAVY },
+  { title: SOLO_TABS["Women's Volleyball"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: GOLD },
   { title: LOG_TAB, headers: LOG_HEADERS, widths: LOG_WIDTHS, color: MAROON },
 ];
 
@@ -53,15 +57,20 @@ for (const tab of tabs) {
   const sheetId = sheet.properties.sheetId;
   const lastColumn = String.fromCharCode(64 + tab.headers.length);
 
-  const current = (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab.title, `A1:${lastColumn}1`)}`)).values?.[0] ?? [];
-  if (current.length && current.join("|") !== tab.headers.join("|")) {
-    throw new Error(`"${tab.title}" row 1 already has different headers; not touching it: ${current.join(", ")}`);
+  const used = (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab.title, "A1:Z")}`)).values ?? [];
+  const current = used[0] ?? [];
+  const differs = current.join("|") !== tab.headers.join("|");
+  if (current.length && differs && used.length > 1) {
+    throw new Error(`"${tab.title}" has data and different headers; not touching it: ${current.join(", ")}`);
   }
-  if (!current.length) {
+  if (differs) {
+    // Clear the old header row first, in case the new layout is narrower.
+    if (current.length) await sheetsApi(`/values/${tabRange(tab.title, "A1:Z1")}:clear`, { method: "POST", body: {} });
     await sheetsApi(`/values/${tabRange(tab.title, `A1:${lastColumn}1`)}?valueInputOption=RAW`, { method: "PUT", body: { values: [tab.headers] } });
+    console.log(`${current.length ? "Updated" : "Wrote"} headers on "${tab.title}"`);
   }
 
-  const textColumns = ["Contact number", "Batch", "Class"].map((name) => tab.headers.indexOf(name));
+  const textColumns = ["Contact number", "Batch", "Class"].map((name) => tab.headers.indexOf(name)).filter((index) => index !== -1);
   await update([
     { updateSheetProperties: { properties: { sheetId, tabColor: tab.color, gridProperties: { frozenRowCount: 1 } }, fields: "tabColor,gridProperties.frozenRowCount" } },
     {
@@ -91,8 +100,9 @@ for (const tab of tabs) {
         fields: "userEnteredFormat.numberFormat",
       },
     })),
+    // Stripes cover every column, including any added since the tab was first set up.
     ...(sheet.bandedRanges?.length
-      ? []
+      ? [{ updateBanding: { bandedRange: { bandedRangeId: sheet.bandedRanges[0]!.bandedRangeId, range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: tab.headers.length } }, fields: "range" } }]
       : [{ addBanding: { bandedRange: { range: { sheetId, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: tab.headers.length }, rowProperties: { firstBandColor: WHITE, secondBandColor: STRIPE } } } }]),
     // The log is the record of every submission: warn anyone who tries to edit it.
     ...(tab.title === LOG_TAB && !sheet.protectedRanges?.length
@@ -102,6 +112,6 @@ for (const tab of tabs) {
   console.log(`Formatted "${tab.title}"`);
 }
 
-// Sport tabs first, log last.
+// Team tabs, then solo tabs, log last.
 await update(tabs.map((tab, index) => ({ updateSheetProperties: { properties: { sheetId: find(tab.title)!.properties.sheetId, index }, fields: "index" } })));
 console.log("Done.");

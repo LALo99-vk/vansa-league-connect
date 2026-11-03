@@ -177,6 +177,8 @@
 .registration-input::placeholder { color: var(--muted-foreground); opacity: 0.8; }
 .registration-input:focus { border-color: var(--ring); outline: 2px solid color-mix(in oklch, var(--ring) 15%, transparent); outline-offset: 1px; }
 .registration-input[aria-invalid="true"] { border-color: var(--destructive); }
+/* Player 1 on a team: the captain, filled from their name and not editable. */
+.registration-input-locked { display: flex; align-items: center; background: var(--muted); color: var(--muted-foreground); }
 .sport-option {
   position: relative;
   display: flex;
