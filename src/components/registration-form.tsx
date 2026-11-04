@@ -26,11 +26,6 @@ const ENTRY_LABELS: Record<(typeof ENTRY_TYPES)[number], [string, string]> = {
   Solo: ["Solo", "We'll put you in a team"],
 };
 
-const SPORT_LABELS: Record<(typeof SPORT_OPTIONS)[number], [string, string]> = {
-  "Football": ["Football", ""],
-  "Volleyball": ["Volleyball", "10:30 AM to 1 PM, then lunch"],
-};
-
 function Jersey({ number }: { number: number }) {
   return <svg viewBox="0 0 32 28" className="jersey" aria-hidden="true">
     <path d="M10.5 1 4 4 0 10.5l5 3 2-2V27h18V11.5l2 2 5-3L28 4l-6.5-3C20.7 3.4 18.6 5 16 5s-4.7-1.6-5.5-4Z" fill="currentColor" />
@@ -112,8 +107,7 @@ export function RegistrationForm() {
         <legend className="mb-3 text-[15px] font-semibold text-primary">Sport<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></legend>
         <div className="grid grid-cols-2 gap-3">{SPORT_OPTIONS.map((sport) => <label key={sport} className="sport-option">
           <input type="radio" name="sport" value={sport} required className="sr-only" aria-invalid={Boolean(errors.sport)} aria-describedby={errors.sport ? "sport-error" : undefined} />
-          <span className="font-display text-[26px] font-extrabold leading-none">{SPORT_LABELS[sport][0]}</span>
-          <span className="sport-option-sub text-xs text-muted-foreground">{SPORT_LABELS[sport][1]}</span>
+          <span className="font-display text-[26px] font-extrabold leading-none">{sport}</span>
         </label>)}</div>
         {errors.sport && <p id="sport-error" className="mt-1.5 text-xs text-destructive">{errors.sport}</p>}
       </fieldset>
