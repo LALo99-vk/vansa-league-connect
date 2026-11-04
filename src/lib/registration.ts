@@ -3,7 +3,7 @@ import { z } from "zod";
 export const PLAYER_COUNT = 6;
 /** A team needs the captain plus at least 3 more. Smaller groups register solo. */
 export const MIN_TEAM_PLAYERS = 4;
-export const SPORT_OPTIONS = ["Men's Football", "Women's Volleyball"] as const;
+export const SPORT_OPTIONS = ["Football", "Volleyball"] as const;
 export const ENTRY_TYPES = ["Team", "Solo"] as const;
 // Closed by hand only, when the school says so: set to false. There is no automatic closing date.
 export const REGISTRATION_OPEN = true;
@@ -29,7 +29,8 @@ export const registrationSchema = z.object({
   batch: optionalText,
   studentClass: optionalText,
   teamName: optionalText,
-  sport: z.enum(SPORT_OPTIONS, { errorMap: () => ({ message: "Please select a sport." }) }),
+  // A page loaded before 4 Nov still sends the old gendered names; accept them.
+  sport: z.preprocess((v) => ({ "Men's Football": "Football", "Women's Volleyball": "Volleyball" } as Record<string, string>)[v as string] ?? v, z.enum(SPORT_OPTIONS, { errorMap: () => ({ message: "Please select a sport." }) })),
   player2: optionalText,
   player3: optionalText,
   player4: optionalText,

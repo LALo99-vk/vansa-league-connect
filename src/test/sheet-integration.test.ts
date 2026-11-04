@@ -11,16 +11,16 @@ import { registrationSchema, type RegistrationData, type RegistrationInput } fro
 
 // Test entries use this contact-number prefix so cleanup can't touch real rows.
 const TEST_PREFIX = "900000";
-const FOOTBALL = SPORT_TABS["Men's Football"];
-const VOLLEYBALL = SPORT_TABS["Women's Volleyball"];
-const SOLO_FOOTBALL = SOLO_TABS["Men's Football"];
-const SOLO_VOLLEYBALL = SOLO_TABS["Women's Volleyball"];
+const FOOTBALL = SPORT_TABS["Football"];
+const VOLLEYBALL = SPORT_TABS["Volleyball"];
+const SOLO_FOOTBALL = SOLO_TABS["Football"];
+const SOLO_VOLLEYBALL = SOLO_TABS["Volleyball"];
 const CLEANUP = [[FOOTBALL, TEAM_COL.contact], [VOLLEYBALL, TEAM_COL.contact], [SOLO_FOOTBALL, SOLO_COL.contact], [SOLO_VOLLEYBALL, SOLO_COL.contact], [LOG_TAB, LOG_COL.contact]] as const;
 
 // Goes through the schema, exactly as a form submission does.
 const entry = (phone: string, overrides: Partial<RegistrationInput> = {}): RegistrationData => registrationSchema.parse({
   entryType: "Team", captainName: "Test Captain", phone: `${TEST_PREFIX}${phone}`, email: "test@example.com", registrantType: "Alumni", batch: "2012", studentClass: "",
-  teamName: `Test Team ${phone}`, sport: "Men's Football",
+  teamName: `Test Team ${phone}`, sport: "Football",
   player2: "P Two", player3: "P Three", player4: "P Four", player5: "P Five", player6: "P Six",
   ...overrides,
 });
@@ -122,13 +122,13 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
   });
 
   it("puts solo volleyball players in their own tab", async () => {
-    await saveRegistration(entry("0022", { entryType: "Solo", sport: "Women's Volleyball" }));
+    await saveRegistration(entry("0022", { entryType: "Solo", sport: "Volleyball" }));
     expect((await rows(SOLO_VOLLEYBALL)).filter((r) => r[SOLO_COL.contact] === "9000000022")).toHaveLength(1);
     expect((await rows(SOLO_FOOTBALL)).filter((r) => r[SOLO_COL.contact] === "9000000022")).toHaveLength(0);
   });
 
   it("puts volleyball teams in their own tab", async () => {
-    await saveRegistration(entry("0002", { sport: "Women's Volleyball" }));
+    await saveRegistration(entry("0002", { sport: "Volleyball" }));
     expect((await rows(VOLLEYBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(1);
     expect((await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(0);
   });

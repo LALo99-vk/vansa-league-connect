@@ -25,10 +25,10 @@ const SOLO_WIDTHS = [170, 130, 220, 130, 70, 70, ...TRACKING_WIDTHS, 120];
 const LOG_WIDTHS = [130, 160, 170, 90, 180, 180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH)];
 
 const tabs = [
-  { title: SPORT_TABS["Men's Football"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: NAVY },
-  { title: SPORT_TABS["Women's Volleyball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
-  { title: SOLO_TABS["Men's Football"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: NAVY },
-  { title: SOLO_TABS["Women's Volleyball"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: GOLD },
+  { title: SPORT_TABS["Football"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: NAVY },
+  { title: SPORT_TABS["Volleyball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
+  { title: SOLO_TABS["Football"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: NAVY },
+  { title: SOLO_TABS["Volleyball"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: GOLD },
   { title: LOG_TAB, headers: LOG_HEADERS, widths: LOG_WIDTHS, color: MAROON },
 ];
 

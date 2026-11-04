@@ -27,8 +27,8 @@ const ENTRY_LABELS: Record<(typeof ENTRY_TYPES)[number], [string, string]> = {
 };
 
 const SPORT_LABELS: Record<(typeof SPORT_OPTIONS)[number], [string, string]> = {
-  "Men's Football": ["Football", "Men's team"],
-  "Women's Volleyball": ["Volleyball", "Women's team · 10:30 AM to 1 PM, then lunch"],
+  "Football": ["Football", ""],
+  "Volleyball": ["Volleyball", "10:30 AM to 1 PM, then lunch"],
 };
 
 function Jersey({ number }: { number: number }) {

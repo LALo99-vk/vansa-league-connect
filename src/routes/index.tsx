@@ -8,7 +8,7 @@ import athletiqLogo from "@/assets/athletiq-logo.png";
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
     { title: "VANSA Sports League 2026 | Team Registration" },
-    { name: "description", content: "Register your team for men's football or women's volleyball at Vidyaniketan School's VANSA Sports League on 15 November 2026 in Bengaluru." },
+    { name: "description", content: "Register your team for football or volleyball at Vidyaniketan School's VANSA Sports League on 15 November 2026 in Bengaluru." },
     { property: "og:title", content: "VANSA Sports League 2026 · Team registration" },
     { property: "og:description", content: "Join Vidyaniketan School alumni and students on the pitch in Bengaluru, 15 November 2026. Register your team now." },
     { property: "og:type", content: "website" },
@@ -70,7 +70,7 @@ function Index() {
             <span className="block text-[92px] sm:text-[140px]">VANSA</span>
             <span className="mt-1 block text-[34px] font-bold sm:text-[50px]">Sports League 2026</span>
           </h1>
-          <p className="mt-6 max-w-[52ch] text-[15px] leading-7 text-primary-foreground/85">Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women’s volleyball for the alumni and current students of Vidyaniketan School, Bengaluru, on 15 November 2026.</p>
+          <p className="mt-6 max-w-[52ch] text-[15px] leading-7 text-primary-foreground/85">Welcome back to the pitch! We're bringing our alumni together for a day of competitive football and volleyball for the alumni and current students of Vidyaniketan School, Bengaluru, on 15 November 2026.</p>
         </div>
       </section>
       <div className="mx-auto max-w-[720px] px-5 pb-16 pt-10 sm:px-8 sm:pt-12">

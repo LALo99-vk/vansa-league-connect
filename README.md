@@ -27,13 +27,13 @@ Create a simple, editorial-style hero with the heading:
 
 Supporting headline: "Old friends. New rivalries."
 
-Description: "Welcome back to the pitch! We're bringing our alumni together for a day of competitive men's football and women's volleyball for the alumni of Vidyaniketan School, Bengaluru."
+Description: "Welcome back to the pitch! We're bringing our alumni together for a day of competitive football and volleyball for the alumni of Vidyaniketan School, Bengaluru."
 
 Display the event date, **15 November 2026**, and venue context, Bengaluru, in a subtle information row.
 
 Include two restrained sport labels:
-- Men's Football
-- Women's Volleyball
+- Football
+- Volleyball
 
 If a visual is needed, use one tasteful, authentic sports photograph or a subtle static sports-inspired graphic. Do not use multiple competing images or a large, distracting collage.
 
@@ -54,7 +54,7 @@ Organise the fields into three sections:
 
 **02 — Team Details**
 - Team Name
-- Sport selection with two clear options: Men's Football and Women's Volleyball.
+- Sport selection with two clear options: Football and Volleyball.
 
 **03 — Players**
 - Player 1 Name

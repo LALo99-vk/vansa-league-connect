@@ -7,14 +7,14 @@
 // site writes by position.
 
 export const SPORT_TABS = {
-  "Men's Football": "Football (Men)",
-  "Women's Volleyball": "Volleyball (Women)",
+  "Football": "Team – Football",
+  "Volleyball": "Team – Volleyball",
 } as const;
 
 /** Players who registered without a team, one tab per sport. */
 export const SOLO_TABS = {
-  "Men's Football": "Solo – Football (Men)",
-  "Women's Volleyball": "Solo – Volleyball (Women)",
+  "Football": "Solo – Football",
+  "Volleyball": "Solo – Volleyball",
 } as const;
 
 /** Every form submission, in the order received. Rows are only ever added. */

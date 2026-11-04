@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { registrationSchema, isRegistrationClosed, playersNamed, SPORT_OPTIONS, PLAYER_COUNT, MIN_TEAM_PLAYERS } from "@/lib/registration";
 
 const entry = {
-  entryType: "Team", captainName: " Captain Name ", phone: " 9876543210 ", email: " captain@example.com ", registrantType: "Alumni", batch: " 2018 ", studentClass: "", teamName: " Alumni United ", sport: "Men's Football",
+  entryType: "Team", captainName: " Captain Name ", phone: " 9876543210 ", email: " captain@example.com ", registrantType: "Alumni", batch: " 2018 ", studentClass: "", teamName: " Alumni United ", sport: "Football",
   player2: " Player Two ", player3: " Player Three ", player4: " Player Four ", player5: " Player Five ", player6: " Player Six ",
 };
-const solo = { entryType: "Solo", captainName: "Solo Player", phone: "9876543211", email: "solo@example.com", registrantType: "Alumni", batch: "2015", studentClass: "", sport: "Women's Volleyball" };
+const solo = { entryType: "Solo", captainName: "Solo Player", phone: "9876543211", email: "solo@example.com", registrantType: "Alumni", batch: "2015", studentClass: "", sport: "Volleyball" };
 
 describe("VANSA team registration", () => {
   it("accepts a full team, trims every value and makes the captain player 1", () => {
