@@ -12,7 +12,8 @@ export const ENTRY_TYPES = ["Team", "Solo"] as const;
 export const REGISTRATION_OPEN = true;
 // The school's first graduating batch is not known, so allow a generous range.
 export const REGISTRANT_TYPES = ["Alumni", "Current student"] as const;
-export const STUDENT_CLASSES = ["10th", "12th"] as const;
+/** Any standard, 1st to 12th (the school decided on 2026-11-06 not to limit it to 10th and 12th). */
+export const STUDENT_CLASSES = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"] as const;
 export const BATCH_MIN_YEAR = 1950;
 export const BATCH_MAX_YEAR = 2026;
 

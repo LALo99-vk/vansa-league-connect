@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ENTRY_TYPES, MIN_TEAM_PLAYERS, PLAYER_COUNT, REGISTRANT_TYPES, SPORT_OPTIONS, STUDENT_CLASSES, isRegistrationClosed, registrationSchema, type RegistrationInput, type Sport } from "@/lib/registration";
 import type { SaveResult } from "@/lib/registration-store";
 import { REGISTRATION_CLOSED, submitRegistration } from "@/lib/submit-registration";
@@ -45,6 +46,7 @@ export function RegistrationForm() {
   // Football squads are 9, volleyball 6.
   const squadSize = sport ? PLAYER_COUNT[sport] : 0;
   const [captainName, setCaptainName] = useState("");
+  const [studentClass, setStudentClass] = useState("");
   const isSolo = entryType === "Solo";
   const submitLabel = isSolo ? "Register as solo player" : "Register team";
 
@@ -70,7 +72,9 @@ export function RegistrationForm() {
       setErrors(nextErrors);
       // Focus the first invalid field in page order, not schema order.
       const firstField = Array.from(form.elements).find((el) => (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) && el.name in nextErrors);
-      if (firstField instanceof HTMLElement) firstField.focus();
+      // The class dropdown submits through a hidden select; focus its visible button instead.
+      if (firstField instanceof HTMLSelectElement) document.getElementById(firstField.name)?.focus();
+      else if (firstField instanceof HTMLElement) firstField.focus();
       return;
     }
     setErrors({});
@@ -97,7 +101,7 @@ export function RegistrationForm() {
       <dt className="text-muted-foreground">Reference</dt><dd className="font-semibold tracking-wide text-foreground">{saved.reference}</dd>
       <dt className="text-muted-foreground">Saved at</dt><dd className="text-foreground">{saved.savedAt} IST</dd>
     </dl>
-    <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => { setSaved(null); setSport(""); setEntryType(""); setCaptainName(""); }}>Back to registration form</Button>
+    <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => { setSaved(null); setStudentClass(""); setSport(""); setEntryType(""); setCaptainName(""); }}>Back to registration form</Button>
   </div>;
 
   return <form className="registration-card" onSubmit={handleSubmit} noValidate aria-labelledby="sheet-title">
@@ -142,10 +146,14 @@ export function RegistrationForm() {
         {registrantType === "Alumni" && <div className="mt-4 sm:max-w-[calc(50%-10px)]"><Field name="batch" label="Batch (year you graduated)" placeholder="e.g. 2012" inputMode="numeric" maxLength={4} error={errors.batch} /></div>}
         {registrantType === "Current student" && <div className="mt-4 sm:max-w-[calc(50%-10px)]">
           <label htmlFor="studentClass" className="mb-2 block text-sm font-medium">Class<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></label>
-          <select id="studentClass" name="studentClass" required defaultValue="" aria-invalid={Boolean(errors.studentClass)} className="registration-input">
-            <option value="" disabled>Select your class</option>
-            {STUDENT_CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select name="studentClass" required value={studentClass} onValueChange={setStudentClass}>
+            <SelectTrigger id="studentClass" aria-invalid={Boolean(errors.studentClass)} className="registration-input class-trigger">
+              <SelectValue placeholder="Select your class" />
+            </SelectTrigger>
+            <SelectContent className="class-menu" position="popper" sideOffset={4}>
+              {STUDENT_CLASSES.map((c) => <SelectItem key={c} value={c} className="class-item">{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
           {errors.studentClass && <p className="mt-1.5 text-xs text-destructive">{errors.studentClass}</p>}
         </div>}
         <p className="mt-3 text-xs text-muted-foreground">Fixtures will be sent to this number on WhatsApp and to this email.</p>

@@ -71,7 +71,8 @@ describe("VANSA team registration", () => {
     const student = { ...entry, registrantType: "Current student", batch: "", studentClass: "10th" };
     expect(registrationSchema.parse(student)).toMatchObject({ batch: "", studentClass: "10th" });
     expect(registrationSchema.safeParse({ ...student, studentClass: "" }).success).toBe(false);
-    expect(registrationSchema.safeParse({ ...student, studentClass: "11th" }).success).toBe(false);
+    expect(registrationSchema.safeParse({ ...student, studentClass: "13th" }).success).toBe(false);
+    for (const studentClass of ["1st", "7th", "11th", "12th"]) expect(registrationSchema.safeParse({ ...student, studentClass }).success).toBe(true);
     expect(registrationSchema.parse({ ...student, batch: "2012" }).batch).toBe("");
     expect(registrationSchema.parse({ ...entry, studentClass: "12th" }).studentClass).toBe("");
     expect(registrationSchema.safeParse({ ...entry, registrantType: "Parent" }).success).toBe(false);

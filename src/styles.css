@@ -194,6 +194,14 @@
 .sport-option:has(input:checked) { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
 .sport-option:has(input:checked) .sport-option-sub { color: var(--gold); }
 .sport-option:has(input:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
+/* Class dropdown (current students): a white list that matches the inputs, not the OS's dark menu. */
+.class-trigger { display: flex; align-items: center; justify-content: space-between; height: 44px; border-radius: 3px; box-shadow: none; cursor: pointer; }
+.class-trigger[data-placeholder] { color: var(--muted-foreground); }
+.class-trigger[data-state="open"] { border-color: var(--ring); }
+.class-menu { background: #fff; color: var(--foreground); border: 1px solid var(--input); border-radius: 4px; box-shadow: 0 8px 24px rgb(10 44 109 / 0.12); max-height: min(264px, var(--radix-select-content-available-height)); }
+.class-item { height: 36px; padding-left: 12px; font-size: 14px; cursor: pointer; border-radius: 3px; }
+.class-item[data-highlighted] { background: var(--accent); color: var(--primary); }
+.class-item[data-state="checked"] { color: var(--primary); font-weight: 600; }
 .jersey { width: 36px; height: 32px; flex-shrink: 0; color: var(--primary); }
 @media (max-width: 639px) {
   .registration-card { padding: 24px 20px; }
