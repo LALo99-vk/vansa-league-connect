@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { ENTRY_TYPES, MIN_TEAM_PLAYERS, PLAYER_COUNT, REGISTRANT_TYPES, SPORT_OPTIONS, STUDENT_CLASSES, isRegistrationClosed, registrationSchema, type RegistrationInput } from "@/lib/registration";
+import { ENTRY_TYPES, MIN_TEAM_PLAYERS, PLAYER_COUNT, REGISTRANT_TYPES, SPORT_OPTIONS, STUDENT_CLASSES, isRegistrationClosed, registrationSchema, type RegistrationInput, type Sport } from "@/lib/registration";
 import type { SaveResult } from "@/lib/registration-store";
 import { REGISTRATION_CLOSED, submitRegistration } from "@/lib/submit-registration";
 
@@ -41,6 +41,9 @@ export function RegistrationForm() {
   const [closed, setClosed] = useState(false);
   const [registrantType, setRegistrantType] = useState<string>("");
   const [entryType, setEntryType] = useState<string>("");
+  const [sport, setSport] = useState<Sport | "">("");
+  // Football squads are 9, volleyball 6.
+  const squadSize = sport ? PLAYER_COUNT[sport] : 0;
   const [captainName, setCaptainName] = useState("");
   const isSolo = entryType === "Solo";
   const submitLabel = isSolo ? "Register as solo player" : "Register team";
@@ -94,7 +97,7 @@ export function RegistrationForm() {
       <dt className="text-muted-foreground">Reference</dt><dd className="font-semibold tracking-wide text-foreground">{saved.reference}</dd>
       <dt className="text-muted-foreground">Saved at</dt><dd className="text-foreground">{saved.savedAt} IST</dd>
     </dl>
-    <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => { setSaved(null); setEntryType(""); setCaptainName(""); }}>Back to registration form</Button>
+    <Button type="button" variant="outline" className="mt-7 h-11 rounded-sm border-primary px-6 font-medium text-primary shadow-none hover:bg-accent hover:text-primary" onClick={() => { setSaved(null); setSport(""); setEntryType(""); setCaptainName(""); }}>Back to registration form</Button>
   </div>;
 
   return <form className="registration-card" onSubmit={handleSubmit} noValidate aria-labelledby="sheet-title">
@@ -105,9 +108,9 @@ export function RegistrationForm() {
     <fieldset disabled={submitting} className="min-w-0">
       <fieldset>
         <legend className="mb-3 text-[15px] font-semibold text-primary">Sport<span className="ml-0.5 text-maroon" aria-hidden="true">*</span></legend>
-        <div className="grid grid-cols-2 gap-3">{SPORT_OPTIONS.map((sport) => <label key={sport} className="sport-option">
-          <input type="radio" name="sport" value={sport} required className="sr-only" aria-invalid={Boolean(errors.sport)} aria-describedby={errors.sport ? "sport-error" : undefined} />
-          <span className="font-display text-[26px] font-extrabold leading-none">{sport}</span>
+        <div className="grid grid-cols-2 gap-3">{SPORT_OPTIONS.map((option) => <label key={option} className="sport-option">
+          <input type="radio" name="sport" value={option} required className="sr-only" checked={sport === option} onChange={() => setSport(option)} aria-invalid={Boolean(errors.sport)} aria-describedby={errors.sport ? "sport-error" : undefined} />
+          <span className="font-display text-[26px] font-extrabold leading-none">{option}</span>
         </label>)}</div>
         {errors.sport && <p id="sport-error" className="mt-1.5 text-xs text-destructive">{errors.sport}</p>}
       </fieldset>
@@ -150,13 +153,14 @@ export function RegistrationForm() {
       {isSolo && <p className="mt-6 rounded-sm border-l-[3px] border-l-gold bg-accent/40 px-4 py-3 text-sm leading-6 text-foreground">Don't have a team? No problem. We'll put you in a team and let you know before 15 Nov.</p>}
       {entryType === "Team" && <section className="mt-9">
         <SectionHeading>Players</SectionHeading>
-        <p className="-mt-2 mb-4 text-xs leading-5 text-muted-foreground">At least {MIN_TEAM_PLAYERS} players, including you. Short of {PLAYER_COUNT}? We'll fill the remaining spots with solo players.</p>
-        <ol className="space-y-3">
+        {!sport && <p className="text-sm text-muted-foreground">Choose a sport above to add your players.</p>}
+        {sport && <p className="-mt-2 mb-4 text-xs leading-5 text-muted-foreground">{sport} teams have {squadSize} players. At least {MIN_TEAM_PLAYERS}, including you. Short of {squadSize}? We'll fill the remaining spots with solo players.</p>}
+        {sport && <ol className="space-y-3">
           <li className="flex items-center gap-3">
             <span className="shrink-0"><span className="sr-only">Player 1, the captain</span><Jersey number={1} /></span>
             <div className="registration-input registration-input-locked">{captainName.trim() ? `${captainName.trim()} (captain)` : "You (captain)"}</div>
           </li>
-          {Array.from({ length: PLAYER_COUNT - 1 }, (_, index) => {
+          {Array.from({ length: squadSize - 1 }, (_, index) => {
             const number = index + 2;
             const name = `player${number}` as FieldName;
             const required = number <= MIN_TEAM_PLAYERS;
@@ -169,7 +173,7 @@ export function RegistrationForm() {
               {error && <p id={`${name}-error`} className="ml-12 mt-1.5 text-xs text-destructive">{error}</p>}
             </li>;
           })}
-        </ol>
+        </ol>}
       </section>}
       <div className="mt-10">
         {saveFailed && <div role="alert" className="mb-5 rounded-sm border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm leading-6 text-foreground"><p className="font-semibold text-destructive">Your registration was not saved.</p><p>Your details are still filled in. Check your internet connection and press {submitLabel} again. If it keeps failing, call Manas on <a className="whitespace-nowrap font-medium text-primary underline underline-offset-4" href="tel:+919902490638">+91 99024 90638</a>.</p></div>}

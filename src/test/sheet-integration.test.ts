@@ -6,7 +6,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { sheetsApi, tabRange } from "@/lib/google-sheets";
 import { saveRegistration } from "@/lib/registration-store";
-import { LOG_COL, LOG_TAB, SOLO_COL, SOLO_TABS, SPORT_TABS, TEAM_COL } from "@/lib/sheet-layout";
+import { LOG_COL, LOG_TAB, SOLO_COL, SOLO_TABS, SPORT_TABS, teamColumns } from "@/lib/sheet-layout";
 import { registrationSchema, type RegistrationData, type RegistrationInput } from "@/lib/registration";
 
 // Test entries use this contact-number prefix so cleanup can't touch real rows.
@@ -15,6 +15,8 @@ const FOOTBALL = SPORT_TABS["Football"];
 const VOLLEYBALL = SPORT_TABS["Volleyball"];
 const SOLO_FOOTBALL = SOLO_TABS["Football"];
 const SOLO_VOLLEYBALL = SOLO_TABS["Volleyball"];
+const TEAM_COL = teamColumns("Football");
+const VOLLEYBALL_COL = teamColumns("Volleyball");
 const CLEANUP = [[FOOTBALL, TEAM_COL.contact], [VOLLEYBALL, TEAM_COL.contact], [SOLO_FOOTBALL, SOLO_COL.contact], [SOLO_VOLLEYBALL, SOLO_COL.contact], [LOG_TAB, LOG_COL.contact]] as const;
 
 // Goes through the schema, exactly as a form submission does.
@@ -26,7 +28,7 @@ const entry = (phone: string, overrides: Partial<RegistrationInput> = {}): Regis
 });
 
 const rows = async (tab: string) =>
-  (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab, "A2:R")}?valueRenderOption=FORMATTED_VALUE`)).values ?? [];
+  (await sheetsApi<{ values?: string[][] }>(`/values/${tabRange(tab, "A2:U")}?valueRenderOption=FORMATTED_VALUE`)).values ?? [];
 const isTest = (row: string[], contactColumn: number) => row[contactColumn]?.startsWith(TEST_PREFIX) ?? false;
 
 async function deleteTestRows() {
@@ -57,7 +59,7 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
 
     const team = (await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000001");
     expect(team).toHaveLength(1);
-    expect(team[0]!.slice(0, 14)).toEqual(["Test Team 0001", "Test Captain", "9000000001", "test@example.com", "Alumni", "2012", "", "6", "Test Captain", "P Two", "P Three", "P Four", "P Five", "P Six"]);
+    expect(team[0]!.slice(0, 17)).toEqual(["Test Team 0001", "Test Captain", "9000000001", "test@example.com", "Alumni", "2012", "", "6", "Test Captain", "P Two", "P Three", "P Four", "P Five", "P Six", "", "", ""]);
     expect(team[0]![TEAM_COL.timesUpdated]).toBe("0");
     expect(team[0]![TEAM_COL.reference]).toBe(result.reference);
 
@@ -85,6 +87,16 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
     const row = (await rows(FOOTBALL)).find((r) => r[TEAM_COL.contact] === "9000000003");
     expect(row?.slice(4, 7)).toEqual(["Current student", "", "12th"]);
     expect(row?.[8]).toBe("Test Captain");
+  });
+
+  it("saves a 9-player football team", async () => {
+    const result = await saveRegistration(entry("0009", { player7: "P Seven", player8: "P Eight", player9: "P Nine" }));
+    const row = (await rows(FOOTBALL)).find((r) => r[TEAM_COL.contact] === "9000000009");
+    expect(row?.[TEAM_COL.playersNamed]).toBe("9");
+    expect(row?.slice(13, 17)).toEqual(["P Six", "P Seven", "P Eight", "P Nine"]);
+    expect(row?.[TEAM_COL.reference]).toBe(result.reference);
+    const log = (await rows(LOG_TAB)).find((r) => r[0] === result.reference);
+    expect(log?.slice(18, 21)).toEqual(["P Seven", "P Eight", "P Nine"]);
   });
 
   it("saves a 4-player team with the last two players blank", async () => {
@@ -128,8 +140,13 @@ describe.skipIf(!process.env["RUN_SHEET_TESTS"])("saving registrations to the re
   });
 
   it("puts volleyball teams in their own tab", async () => {
-    await saveRegistration(entry("0002", { sport: "Volleyball" }));
-    expect((await rows(VOLLEYBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(1);
+    await saveRegistration(entry("0002", { sport: "Volleyball", player7: "Ignored" }));
+    const team = (await rows(VOLLEYBALL)).filter((r) => r[VOLLEYBALL_COL.contact] === "9000000002");
+    expect(team).toHaveLength(1);
+    // Volleyball has 6 player columns: the one after Player 6 is the registration time.
+    expect(team[0]![13]).toBe("P Six");
+    expect(team[0]![VOLLEYBALL_COL.registeredAt]).toMatch(/^\d{4}-\d{2}-\d{2} /);
+    expect(team[0]![VOLLEYBALL_COL.timesUpdated]).toBe("0");
     expect((await rows(FOOTBALL)).filter((r) => r[TEAM_COL.contact] === "9000000002")).toHaveLength(0);
   });
 

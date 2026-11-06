@@ -53,7 +53,19 @@ describe("VANSA team registration", () => {
     expect(registrationSchema.safeParse({ ...entry, batch: "1979" }).success).toBe(true);
     expect(registrationSchema.safeParse({ ...entry, sport: "Cricket" }).success).toBe(false);
     for (const sport of SPORT_OPTIONS) expect(registrationSchema.safeParse({ ...entry, sport }).success).toBe(true);
-    expect(PLAYER_COUNT).toBe(6);
+    expect(PLAYER_COUNT).toEqual({ Football: 9, Volleyball: 6 });
+  });
+  it("takes 9 players for football", () => {
+    const result = registrationSchema.parse({ ...entry, player7: " Seven ", player8: "Eight", player9: "Nine" });
+    expect([result.player7, result.player8, result.player9]).toEqual(["Seven", "Eight", "Nine"]);
+    expect(playersNamed(result)).toBe(9);
+  });
+  it("takes 6 players for volleyball and drops anything past player 6", () => {
+    const result = registrationSchema.parse({ ...entry, sport: "Volleyball", player7: "Seven", player8: "Eight", player9: "Nine" });
+    expect([result.player6, result.player7, result.player8, result.player9]).toEqual(["Player Six", "", "", ""]);
+    expect(playersNamed(result)).toBe(6);
+    // Boxes 7–9 don't count towards the minimum of 4 for volleyball.
+    expect(registrationSchema.safeParse({ ...entry, sport: "Volleyball", player3: "", player4: "", player5: "", player6: "", player7: "A", player8: "B" }).success).toBe(false);
   });
   it("asks current students for their class, not a graduation year", () => {
     const student = { ...entry, registrantType: "Current student", batch: "", studentClass: "10th" };

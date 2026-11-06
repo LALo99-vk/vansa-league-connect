@@ -4,7 +4,7 @@
 //
 //   node --experimental-strip-types --env-file=.env scripts/setup-sheet.ts
 import { sheetsApi, tabRange } from "../src/lib/google-sheets.ts";
-import { LOG_HEADERS, LOG_TAB, SOLO_HEADERS, SOLO_TABS, SPORT_TABS, TEAM_HEADERS } from "../src/lib/sheet-layout.ts";
+import { LOG_HEADERS, LOG_TAB, SOLO_HEADERS, SOLO_TABS, SPORT_TABS, SQUAD_SIZE, teamHeaders } from "../src/lib/sheet-layout.ts";
 
 type SheetMeta = {
   properties: { sheetId: number; title: string };
@@ -20,13 +20,13 @@ const GOLD = { red: 245 / 255, green: 180 / 255, blue: 0 };
 
 const PLAYER_WIDTH = 150;
 const TRACKING_WIDTHS = [160, 160, 110, 140];
-const TEAM_WIDTHS = [180, 170, 130, 220, 130, 70, 70, 110, ...Array(6).fill(PLAYER_WIDTH), ...TRACKING_WIDTHS];
+const teamWidths = (players: number) => [180, 170, 130, 220, 130, 70, 70, 110, ...Array(players).fill(PLAYER_WIDTH), ...TRACKING_WIDTHS];
 const SOLO_WIDTHS = [170, 130, 220, 130, 70, 70, ...TRACKING_WIDTHS, 120];
-const LOG_WIDTHS = [130, 160, 170, 90, 180, 180, 170, 130, 220, 130, 70, 70, ...Array(6).fill(PLAYER_WIDTH)];
+const LOG_WIDTHS = [130, 160, 170, 90, 180, 180, 170, 130, 220, 130, 70, 70, ...Array(SQUAD_SIZE["Football"]).fill(PLAYER_WIDTH)];
 
 const tabs = [
-  { title: SPORT_TABS["Football"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: NAVY },
-  { title: SPORT_TABS["Volleyball"], headers: TEAM_HEADERS, widths: TEAM_WIDTHS, color: GOLD },
+  { title: SPORT_TABS["Football"], headers: teamHeaders("Football"), widths: teamWidths(SQUAD_SIZE["Football"]), color: NAVY },
+  { title: SPORT_TABS["Volleyball"], headers: teamHeaders("Volleyball"), widths: teamWidths(SQUAD_SIZE["Volleyball"]), color: GOLD },
   { title: SOLO_TABS["Football"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: NAVY },
   { title: SOLO_TABS["Volleyball"], headers: SOLO_HEADERS, widths: SOLO_WIDTHS, color: GOLD },
   { title: LOG_TAB, headers: LOG_HEADERS, widths: LOG_WIDTHS, color: MAROON },

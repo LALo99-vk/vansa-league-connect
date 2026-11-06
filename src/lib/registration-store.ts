@@ -11,8 +11,8 @@
  * Any failure throws, and the form tells the person nothing was confirmed.
  */
 import { sheetsApi, tabRange, withRetry, SheetsError } from "./google-sheets";
-import { LOG_COL, LOG_LAST_COLUMN, LOG_SAVED_COLUMN, LOG_TAB, SOLO_COL, SOLO_LAST_COLUMN, SOLO_TABS, SOLO_WRITE_LAST_COLUMN, SPORT_TABS, TEAM_COL, TEAM_LAST_COLUMN } from "./sheet-layout";
-import { playersNamed, type RegistrationData } from "./registration";
+import { LOG_COL, LOG_LAST_COLUMN, LOG_SAVED_COLUMN, LOG_TAB, SOLO_COL, SOLO_LAST_COLUMN, SOLO_TABS, SOLO_WRITE_LAST_COLUMN, SPORT_TABS, teamColumns } from "./sheet-layout";
+import { allPlayers, playersNamed, sportPlayers, type RegistrationData } from "./registration";
 
 export type SaveResult = { reference: string; action: "new" | "updated"; savedAt: string; entryType: RegistrationData["entryType"] };
 
@@ -29,7 +29,11 @@ const SAVED = {
 type RowLayout = {
   readColumn: string; writeColumn: string; contact: number; registeredAt: number; timesUpdated: number; reference: number; what: string;
 };
-const TEAM_ROWS: RowLayout = { readColumn: TEAM_LAST_COLUMN, writeColumn: TEAM_LAST_COLUMN, ...TEAM_COL, what: "the team row" };
+// Team tabs differ per sport (9 player columns for football, 6 for volleyball).
+function teamRows(sport: RegistrationData["sport"]): RowLayout {
+  const { lastColumn, ...columns } = teamColumns(sport);
+  return { readColumn: lastColumn, writeColumn: lastColumn, ...columns, what: "the team row" };
+}
 // Solo rows are read up to "Group" but written only up to the column before it,
 // so a group the organisers assigned is never overwritten.
 const SOLO_ROWS: RowLayout = { readColumn: SOLO_LAST_COLUMN, writeColumn: SOLO_WRITE_LAST_COLUMN, ...SOLO_COL, what: "the solo player row" };
@@ -135,13 +139,12 @@ export function saveRegistration(data: RegistrationData): Promise<SaveResult> {
     const isTeam = data.entryType === "Team";
     const tab = isTeam ? SPORT_TABS[data.sport] : SOLO_TABS[data.sport];
     const person = [data.phone, data.email, data.registrantType, data.batch, data.studentClass];
-    const players = [data.player1, data.player2, data.player3, data.player4, data.player5, data.player6];
 
     const logRow = await withRetry(() =>
-      logSubmission([reference, at, PENDING, data.entryType, tab, data.teamName, data.captainName, ...person, ...players]));
+      logSubmission([reference, at, PENDING, data.entryType, tab, data.teamName, data.captainName, ...person, ...allPlayers(data)]));
     const action = await withRetry(() => isTeam
-      ? saveRow(tab, TEAM_ROWS, data.phone, at, reference, (...tracking) =>
-        [data.teamName, data.captainName, ...person, String(playersNamed(data)), ...players, ...tracking])
+      ? saveRow(tab, teamRows(data.sport), data.phone, at, reference, (...tracking) =>
+        [data.teamName, data.captainName, ...person, String(playersNamed(data)), ...sportPlayers(data), ...tracking])
       : saveRow(tab, SOLO_ROWS, data.phone, at, reference, (...tracking) => [data.captainName, ...person, ...tracking]));
     await withRetry(() => writeRow(LOG_TAB, `${LOG_SAVED_COLUMN}${logRow}`, [SAVED[data.entryType][action]], "the log status"));
     return { reference, action, savedAt: at, entryType: data.entryType };
