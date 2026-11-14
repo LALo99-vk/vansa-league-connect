@@ -9,7 +9,7 @@ export const PLAYER_COUNT: Record<Sport, number> = SQUAD_SIZE;
 export const MIN_TEAM_PLAYERS = 4;
 export const ENTRY_TYPES = ["Team", "Solo"] as const;
 // Closed by hand only, when the school says so: set to false. There is no automatic closing date.
-export const REGISTRATION_OPEN = true;
+export const REGISTRATION_OPEN = false;
 // The school's first graduating batch is not known, so allow a generous range.
 export const REGISTRANT_TYPES = ["Alumni", "Current student"] as const;
 /** Any standard, 1st to 12th (the school decided on 2026-11-06 not to limit it to 10th and 12th). */

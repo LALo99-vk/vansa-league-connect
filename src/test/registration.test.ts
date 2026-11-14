@@ -102,7 +102,7 @@ describe("VANSA solo registration", () => {
 });
 
 describe("VANSA registration window", () => {
-  it("stays open until closed by hand", () => {
-    expect(isRegistrationClosed()).toBe(false);
+  it("is closed by hand (closed 14 Nov 2026, the day before the event)", () => {
+    expect(isRegistrationClosed()).toBe(true);
   });
 });

@@ -223,6 +223,12 @@
 @keyframes emblem-rise { from { opacity: 0; transform: translateY(18px); } }
 @keyframes emblem-land { from { opacity: 0; transform: translateY(-26px) scale(0.94); } }
 @keyframes emblem-cap { from { opacity: 0; transform: translateY(-60px) rotate(-30deg); } }
+/* Mobile fixtures bar slides up from the bottom edge once, shortly after load. */
+.fixtures-bar { animation: fixtures-bar-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both; }
+@keyframes fixtures-bar-in { from { transform: translateY(calc(100% + 24px)); } }
+/* The picked sport's ball rolls in once. */
+.sport-tab-roll { animation: sport-tab-roll 600ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes sport-tab-roll { from { transform: translateX(-14px) rotate(-200deg); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
