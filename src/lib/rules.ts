@@ -1,11 +1,9 @@
 // Short summary of the organisers' "VANSA 2026 : Rules & Regulations" PDF, shown under the
-// fixtures. Only what the PDF says, plus the 14 Nov timing change (volleyball first, lunch, then
-// football); change it here if the organisers change the document.
+// fixtures. Only what the PDF says; change it here if the organisers change the document.
 import type { FixtureSport } from "./fixtures";
 
 export const GENERAL_RULES = [
   "Report at 10:00 AM. Player registration 10:00–10:20 is mandatory; opening at 10:20.",
-  "Volleyball first, 10:30 AM – 1:20 PM. Lunch 1:20 – 2:00. Football after lunch, 2:00 – 4:50 PM. Football teams report by 1:30 PM.",
   "Bring your own breakfast. Lunch, first aid and water are provided.",
   "The referees' and organisers' decisions are final.",
 ];
