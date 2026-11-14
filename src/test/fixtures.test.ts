@@ -89,4 +89,23 @@ describe("fixture tabs", () => {
     const picked = parseSportTab("volleyball", [...head, row("M1", "A", "B", "1", "1", "League", "B")]);
     expect(picked.standings.map((r) => [r.team, r.points])).toEqual([["B", 2], ["A", 0]]);
   });
+
+  it("volleyball: level on points scored too, set difference then point difference decide", () => {
+    const vHead = [["Match", "Time", "Team A", "Team B", "Score A", "Score B", "Stage", "Venue", "Winner", "Status", "Points A", "Points B"]];
+    const v = (id: string, a: string, b: string, sa: string, sb: string, pa: string, pb: string) => [id, "", a, b, sa, sb, "League", "", "", "", pa, pb];
+    // P beats R 2–0 (50–30), Q beats R 2–0 (50–45), P v Q not played yet. P and Q: 2 pts, SD +2 each; PD P +20, Q +5.
+    const data = parseSportTab("volleyball", [...vHead, v("M1", "Q", "R", "2", "0", "50", "45"), v("M2", "P", "R", "2", "0", "50", "30")]);
+    expect(data.standings.map((r) => r.team)).toEqual(["P", "Q", "R"]);
+    const p = data.standings[0]!;
+    expect([p.pointsFor, p.pointsAgainst]).toEqual([50, 30]);
+    expect(data.league[0]?.pointsA).toBe(50);
+  });
+
+  it("volleyball: total points scored beats set difference on a tie (rules doc)", () => {
+    const vHead = [["Match", "Time", "Team A", "Team B", "Score A", "Score B", "Stage", "Venue", "Winner", "Status", "Points A", "Points B"]];
+    const v = (id: string, a: string, b: string, sa: string, sb: string, pa: string, pb: string) => [id, "", a, b, sa, sb, "League", "", "", "", pa, pb];
+    // P beats R 2–1 (60 pts), Q beats R 2–0 (44 pts). Both 2 pts; Q has the better SD, P scored more.
+    const data = parseSportTab("volleyball", [...vHead, v("M1", "Q", "R", "2", "0", "44", "30"), v("M2", "P", "R", "2", "1", "60", "50")]);
+    expect(data.standings.map((r) => r.team)).toEqual(["P", "Q", "R"]);
+  });
 });

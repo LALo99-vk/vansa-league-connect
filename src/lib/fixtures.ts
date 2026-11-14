@@ -12,11 +12,12 @@
 
 export type FixtureSport = "football" | "volleyball";
 
-// The organiser's rules, from his STANDINGS tab: football Win 3 · Draw 1 · Loss 0, tie-break
-// goal difference; volleyball Win 2 · Loss 0, tie-break set difference (no draws).
-export const SPORTS: { slug: FixtureSport; label: string; tab: string; scoreLabel: string; win: number; draw: number; draws: boolean; cols: { for: string; against: string; diff: string }; tieBreak: string }[] = [
-  { slug: "football", label: "Football", tab: "FOOTBALL", scoreLabel: "Goals", win: 3, draw: 1, draws: true, cols: { for: "GF", against: "GA", diff: "GD" }, tieBreak: "goal difference" },
-  { slug: "volleyball", label: "Volleyball", tab: "VOLLEYBALL", scoreLabel: "Sets", win: 2, draw: 0, draws: false, cols: { for: "SW", against: "SL", diff: "SD" }, tieBreak: "set difference" },
+// From the organisers' "VANSA 2026 : Rules & Regulations": football Win 3 · Draw 1 · Loss 0,
+// tie-break goal difference then goals scored; volleyball Win 2 · Loss 0 (no draws), tie-break
+// the cumulative score of all games (Points A/B columns), then set difference.
+export const SPORTS: { slug: FixtureSport; label: string; tab: string; scoreLabel: string; win: number; draw: number; draws: boolean; rallyPoints: boolean; cols: { for: string; against: string; diff: string }; tieBreak: string }[] = [
+  { slug: "football", label: "Football", tab: "FOOTBALL", scoreLabel: "Goals", win: 3, draw: 1, draws: true, rallyPoints: false, cols: { for: "GF", against: "GA", diff: "GD" }, tieBreak: "goal difference, then goals scored" },
+  { slug: "volleyball", label: "Volleyball", tab: "VOLLEYBALL", scoreLabel: "Sets", win: 2, draw: 0, draws: false, rallyPoints: true, cols: { for: "SW", against: "SL", diff: "SD" }, tieBreak: "total points scored across all games, then set difference" },
 ];
 
 export type MatchStatus = "upcoming" | "live" | "completed";
@@ -32,6 +33,9 @@ export type Fixture = {
   placeholderB: string | null;
   scoreA: number | null;
   scoreB: number | null;
+  /** Volleyball: rally points across all sets, when the desk fills Points A/B. */
+  pointsA: number | null;
+  pointsB: number | null;
   status: MatchStatus;
   /** "draw" only in the league; a final needs a winner. */
   result: "a" | "b" | "draw" | null;
@@ -45,6 +49,9 @@ export type StandingRow = {
   lost: number;
   scored: number;
   conceded: number;
+  /** Volleyball rally points scored and allowed; 0 for football. */
+  pointsFor: number;
+  pointsAgainst: number;
   points: number;
 };
 
@@ -70,6 +77,8 @@ const HEADERS: Record<string, string[]> = {
   teamB: ["teamb", "team2"],
   scoreA: ["scorea", "score1"],
   scoreB: ["scoreb", "score2"],
+  pointsA: ["pointsa", "points1", "pointsscoreda"],
+  pointsB: ["pointsb", "points2", "pointsscoredb"],
   stage: ["stage", "round"],
   venue: ["venue", "ground", "court"],
   winner: ["winner"],
@@ -109,6 +118,8 @@ function readRow(row: string[], cols: Record<string, number>, sheetRow: number, 
   const teamB = get("teamB");
   const scoreA = toScore(get("scoreA"));
   const scoreB = toScore(get("scoreB"));
+  const pointsA = toScore(get("pointsA"));
+  const pointsB = toScore(get("pointsB"));
   const winnerCell = get("winner");
   const statusCell = readStatus(get("status"));
   const id = get("id") || `Row ${sheetRow}`;
@@ -144,15 +155,17 @@ function readRow(row: string[], cols: Record<string, number>, sheetRow: number, 
     placeholderB: null,
     scoreA,
     scoreB,
+    pointsA,
+    pointsB,
     status,
     result,
   };
 }
 
-function buildStandings(league: Fixture[], win: number, draw: number): StandingRow[] {
+function buildStandings(league: Fixture[], win: number, draw: number, compare: (a: StandingRow, b: StandingRow) => number): StandingRow[] {
   const teams: string[] = [];
   for (const m of league) for (const t of [m.teamA, m.teamB]) if (t && !teams.some((k) => norm(k) === norm(t))) teams.push(t);
-  const rows = teams.map((team): StandingRow => ({ team, played: 0, won: 0, drawn: 0, lost: 0, scored: 0, conceded: 0, points: 0 }));
+  const rows = teams.map((team): StandingRow => ({ team, played: 0, won: 0, drawn: 0, lost: 0, scored: 0, conceded: 0, pointsFor: 0, pointsAgainst: 0, points: 0 }));
   for (const m of league) {
     if (!m.result) continue;
     for (const side of ["a", "b"] as const) {
@@ -161,6 +174,8 @@ function buildStandings(league: Fixture[], win: number, draw: number): StandingR
       row.played += 1;
       row.scored += (side === "a" ? m.scoreA : m.scoreB) ?? 0;
       row.conceded += (side === "a" ? m.scoreB : m.scoreA) ?? 0;
+      row.pointsFor += (side === "a" ? m.pointsA : m.pointsB) ?? 0;
+      row.pointsAgainst += (side === "a" ? m.pointsB : m.pointsA) ?? 0;
       if (m.result === "draw") {
         row.drawn += 1;
         row.points += draw;
@@ -170,13 +185,21 @@ function buildStandings(league: Fixture[], win: number, draw: number): StandingR
       } else row.lost += 1;
     }
   }
-  // Points, then the difference (the organiser's tie-break), then scored, then fixture order.
-  return rows.sort(
-    (a, b) => b.points - a.points || b.scored - b.conceded - (a.scored - a.conceded) || b.scored - a.scored || teams.indexOf(a.team) - teams.indexOf(b.team),
-  );
+  return rows.sort((a, b) => compare(a, b) || teams.indexOf(a.team) - teams.indexOf(b.team));
 }
 
-const level = (a: StandingRow, b: StandingRow) => a.points === b.points && a.scored - a.conceded === b.scored - b.conceded && a.scored === b.scored;
+// Football (rules doc): points, goal difference, goals scored.
+// Volleyball (rules doc): points, then "the cumulative score of all games" = rally points
+// scored; then set difference (the organiser's STANDINGS tab) and rally-point difference,
+// so the table still sorts sensibly if the desk leaves Points A/B empty.
+const compareFootball = (a: StandingRow, b: StandingRow) =>
+  b.points - a.points || b.scored - b.conceded - (a.scored - a.conceded) || b.scored - a.scored;
+const compareVolleyball = (a: StandingRow, b: StandingRow) =>
+  b.points - a.points ||
+  b.pointsFor - a.pointsFor ||
+  b.scored - b.conceded - (a.scored - a.conceded) ||
+  b.pointsFor - b.pointsAgainst - (a.pointsFor - a.pointsAgainst);
+const comparer = (slug: FixtureSport) => (slug === "volleyball" ? compareVolleyball : compareFootball);
 
 export function parseSportTab(slug: FixtureSport, grid: string[][]): SportFixtures {
   const sport = SPORTS.find((s) => s.slug === slug)!;
@@ -200,13 +223,14 @@ export function parseSportTab(slug: FixtureSport, grid: string[][]): SportFixtur
     else league.push(fixture);
   });
 
-  const standings = buildStandings(league, sport.win, sport.draw);
+  const compare = comparer(slug);
+  const standings = buildStandings(league, sport.win, sport.draw, compare);
   const leagueComplete = league.length > 0 && league.every((m) => m.result);
   const [first, second, third] = standings;
   // Only 2nd v 3rd matters: if 1st and 2nd are level, both are finalists either way.
   const tieNote =
-    leagueComplete && first && second && third && level(second, third)
-      ? `${second.team} and ${third.team} are level on points, ${sport.tieBreak} and ${sport.scoreLabel.toLowerCase()} scored; the organisers will settle the second finalist.`
+    leagueComplete && first && second && third && compare(second, third) === 0
+      ? `${second.team} and ${third.team} are level on every tie-break; the organisers will settle the second finalist.`
       : null;
 
   let champion: string | null = null;

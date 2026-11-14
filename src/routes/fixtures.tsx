@@ -3,6 +3,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Trophy, Volleyball } from "lucide-react";
 import { SPORTS, type Fixture, type FixtureSport, type SportFixtures } from "@/lib/fixtures";
 import { getFixtures } from "@/lib/fixtures-store";
+import { GENERAL_RULES, RULES_CONTACT, SPORT_RULES } from "@/lib/rules";
 import schoolLogo from "@/assets/vidyaniketan-logo.png";
 import schoolWordmark from "@/assets/vidyaniketan-wordmark.png";
 import athletiqLogo from "@/assets/athletiq-logo.png";
@@ -67,36 +68,41 @@ function MatchCard({ match }: { match: Fixture }) {
     <TeamLine name={match.teamA} placeholder={match.placeholderA} score={match.scoreA} won={match.result === "a"} lost={match.result === "b"} />
     <TeamLine name={match.teamB} placeholder={match.placeholderB} score={match.scoreB} won={match.result === "b"} lost={match.result === "a"} />
     {match.result === "draw" && <p className="mt-1 text-xs text-muted-foreground">Draw</p>}
+    {match.pointsA !== null && match.pointsB !== null && <p className="mt-1 text-xs text-muted-foreground">Points {match.pointsA}–{match.pointsB}</p>}
   </div>;
 }
 
 function Standings({ data, sport }: { data: SportFixtures; sport: (typeof SPORTS)[number] }) {
   const { cols } = sport;
-  const th = "px-1.5 py-2 font-semibold sm:px-2.5";
-  const td = "px-1.5 py-2.5 tabular-nums sm:px-2.5";
+  // Volleyball has two more columns, so it packs tighter on phones.
+  const pad = sport.rallyPoints ? "px-1" : "px-1.5";
+  const th = `${pad} py-2 font-semibold sm:px-2.5`;
+  const td = `${pad} py-2.5 tabular-nums sm:px-2.5`;
   return <div className="overflow-x-auto rounded-md border border-border bg-card">
-    <table className="w-full text-[13px] sm:text-sm">
+    <table className={`w-full sm:text-sm ${sport.rallyPoints ? "text-[12px]" : "text-[13px]"}`}>
       <thead className="bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
         <tr>
-          <th className="py-2 pl-3 pr-1 text-left font-semibold">#</th>
+          <th className="py-2 pl-2.5 pr-1 text-left font-semibold sm:pl-3">#</th>
           <th className={`${th} text-left`}>Team</th>
           <th className={th} title="Played">P</th><th className={th} title="Won">W</th>{sport.draws && <th className={th} title="Drawn">D</th>}<th className={th} title="Lost">L</th>
           <th className={th} title={sport.slug === "football" ? "Goals for" : "Sets won"}>{cols.for}</th>
           <th className={th} title={sport.slug === "football" ? "Goals against" : "Sets lost"}>{cols.against}</th>
           <th className={th} title={sport.slug === "football" ? "Goal difference" : "Set difference"}>{cols.diff}</th>
-          <th className="py-2 pl-1.5 pr-3 font-semibold">Pts</th>
+          {sport.rallyPoints && <><th className={th} title="Points scored">PS</th><th className={th} title="Points allowed">PA</th></>}
+          <th className="py-2 pl-1 pr-2.5 font-semibold sm:pr-3">Pts</th>
         </tr>
       </thead>
       <tbody>{data.standings.map((row, i) => {
         const diff = row.scored - row.conceded;
         const finalist = data.leagueComplete && !data.tieNote && i < 2;
         return <tr key={row.team} className={`border-t border-border text-center ${finalist ? "bg-gold/15" : ""}`}>
-          <td className="py-2.5 pl-3 pr-1 text-left text-muted-foreground">{i + 1}</td>
-          <td className="px-1.5 py-2.5 text-left font-medium sm:px-2.5">{row.team}{finalist && <span className="ml-1.5 rounded bg-gold px-1.5 py-0.5 text-[10px] font-bold uppercase text-navy-deep">Final</span>}</td>
+          <td className="py-2.5 pl-2.5 pr-1 text-left text-muted-foreground sm:pl-3">{i + 1}</td>
+          <td className={`${pad} py-2.5 text-left font-medium sm:px-2.5`}>{row.team}{finalist && <span className="ml-1.5 rounded bg-gold px-1.5 py-0.5 text-[10px] font-bold uppercase text-navy-deep">Final</span>}</td>
           <td className={td}>{row.played}</td><td className={td}>{row.won}</td>{sport.draws && <td className={td}>{row.drawn}</td>}<td className={td}>{row.lost}</td>
           <td className={td}>{row.scored}</td><td className={td}>{row.conceded}</td>
           <td className={`${td} font-medium`}>{diff > 0 ? `+${diff}` : diff}</td>
-          <td className="py-2.5 pl-1.5 pr-3 font-bold tabular-nums">{row.points}</td>
+          {sport.rallyPoints && <><td className={td}>{row.pointsFor}</td><td className={td}>{row.pointsAgainst}</td></>}
+          <td className="py-2.5 pl-1 pr-2.5 font-bold tabular-nums sm:pr-3">{row.points}</td>
         </tr>;
       })}</tbody>
     </table>
@@ -124,7 +130,7 @@ function SportView({ data }: { data: SportFixtures }) {
     </section>}
     <section>
       <h2 className="font-display text-2xl font-bold">League table</h2>
-      <p className="mb-3 mt-1 text-xs text-muted-foreground">Everyone plays everyone; the top 2 play the final. Win {sport.win}{sport.draws ? ` · Draw ${sport.draw}` : ""} · Loss 0 · tie-break: {sport.tieBreak}, then {sport.scoreLabel.toLowerCase()} scored. Updates by itself as scores come in.</p>
+      <p className="mb-3 mt-1 text-xs text-muted-foreground">Everyone plays everyone; the top 2 play the final. Win {sport.win}{sport.draws ? ` · Draw ${sport.draw}` : ""} · Loss 0 · tie-break: {sport.tieBreak}. Updates by itself as scores come in.</p>
       <Standings data={data} sport={sport} />
       {data.tieNote && <p className="mt-2 text-sm text-maroon">{data.tieNote}</p>}
     </section>
@@ -132,7 +138,26 @@ function SportView({ data }: { data: SportFixtures }) {
       <h2 className="mb-3 font-display text-2xl font-bold">League matches</h2>
       <div className="grid gap-3 sm:grid-cols-2">{data.league.map((m) => <MatchCard key={m.id} match={m} />)}</div>
     </section>
+    <Rules sport={sport} />
   </div>;
+}
+
+function RuleList({ items }: { items: string[] }) {
+  return <ul className="space-y-1.5 text-sm leading-snug">{items.map((r) => <li key={r} className="flex gap-2.5"><span className="mt-[0.45em] size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" />{r}</li>)}</ul>;
+}
+
+function Rules({ sport }: { sport: (typeof SPORTS)[number] }) {
+  return <section>
+    <h2 className="mb-3 font-display text-2xl font-bold">{sport.label} rules</h2>
+    <div className="space-y-4 rounded-md border border-border bg-card px-5 py-4">
+      <RuleList items={SPORT_RULES[sport.slug]} />
+      <div className="border-t border-border pt-4">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Both sports</p>
+        <RuleList items={GENERAL_RULES} />
+      </div>
+      <p className="text-xs text-muted-foreground">Questions: {RULES_CONTACT.name}, <a className="font-semibold text-primary underline-offset-2 hover:underline" href={`tel:${RULES_CONTACT.phone.replace(/\s/g, "")}`}>{RULES_CONTACT.phone}</a></p>
+    </div>
+  </section>;
 }
 
 function FixturesPage() {
